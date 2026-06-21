@@ -60,12 +60,13 @@ export default function HomePage() {
                 <p className="mb-2 text-sm font-bold text-ink/58 dark:text-paper/58">{group.name}</p>
                 <div className="flex flex-wrap gap-2">
                   {group.items.map((item) => (
-                    <span
+                    <Link
                       key={item}
+                      href={'/posts?category=${encodeURIComponent(item)}'}
                       className="rounded-md border border-ink/10 bg-paper px-3 py-2 text-sm font-medium text-ink/72 dark:border-white/10 dark:bg-white/[0.04] dark:text-paper/72"
                     >
                       {item}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               </div>
