@@ -10,13 +10,13 @@ export const metadata: Metadata = {
 
 const CATEGORIES = ["Front-End", "Back-End", "CS", "기타", "일상 및 여행"];
 
-export default function PostsPage({
+export default async function PostsPage({
   searchParams,
 }: {
-  searchParams: { category?: string };
+  searchParams: Promise<{ category?: string }>;
 }) {
   const allPosts = getAllPosts();
-  const selected = searchParams.category;
+  const { category: selected } = await searchParams;
 
   const posts = selected
     ? allPosts.filter((p) => p.category === selected)
