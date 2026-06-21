@@ -15,14 +15,14 @@ export default function HomePage() {
         <div className="space-y-6">
           <div className="inline-flex items-center gap-2 rounded-md border border-mint/40 bg-mint/14 px-3 py-2 text-sm font-semibold text-ink dark:text-paper">
             <Sparkles aria-hidden size={16} />
-            Next.js, MDX, 작은 기록들
+            작은 배움의 아카이브
           </div>
           <div className="space-y-4">
             <h1 className="text-balance text-4xl font-black leading-tight text-ink dark:text-paper sm:text-5xl">
-              공부와 일상을 차곡차곡 쌓는 개인 기술 블로그
+              배움과 경험을 차곡차곡 모으는 공간
             </h1>
             <p className="max-w-2xl text-lg leading-8 text-ink/70 dark:text-paper/70">
-              Front-End, Back-End, CS 공부 기록과 여행 메모를 MDX로 관리하고, 픽셀 감성의 작은 UI로 읽기 좋게 보여줍니다.
+             프론트엔드와 백엔드, CS 공부 기록부터 프로젝트 경험과 일상 메모까지 정리합니다.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
