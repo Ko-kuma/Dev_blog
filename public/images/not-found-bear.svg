@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="384" viewBox="0 0 512 384" role="img" aria-labelledby="title desc" shape-rendering="crispEdges">
+  <title id="title">픽셀 곰 404</title>
+  <desc id="desc">길을 잃은 픽셀 곰이 작은 표지판 옆에 서 있습니다.</desc>
+  <rect width="512" height="384" fill="#f7fbff"/>
+  <rect x="64" y="288" width="384" height="24" fill="#7ad7c4"/>
+  <rect x="96" y="312" width="320" height="24" fill="#22252d" opacity="0.12"/>
+  <rect x="184" y="112" width="144" height="144" fill="#8b5a3c"/>
+  <rect x="152" y="80" width="64" height="64" fill="#8b5a3c"/>
+  <rect x="296" y="80" width="64" height="64" fill="#8b5a3c"/>
+  <rect x="208" y="144" width="96" height="72" fill="#c58a5a"/>
+  <rect x="224" y="160" width="24" height="24" fill="#22252d"/>
+  <rect x="264" y="160" width="24" height="24" fill="#22252d"/>
+  <rect x="240" y="192" width="32" height="24" fill="#f2d1aa"/>
+  <rect x="248" y="184" width="16" height="16" fill="#22252d"/>
+  <rect x="184" y="240" width="56" height="48" fill="#6f432d"/>
+  <rect x="272" y="240" width="56" height="48" fill="#6f432d"/>
+  <rect x="344" y="136" width="80" height="56" fill="#ff8f7d"/>
+  <rect x="352" y="144" width="64" height="40" fill="#fff"/>
+  <rect x="368" y="152" width="8" height="24" fill="#22252d"/>
+  <rect x="384" y="152" width="8" height="24" fill="#22252d"/>
+  <rect x="400" y="152" width="8" height="24" fill="#22252d"/>
+  <rect x="376" y="200" width="16" height="88" fill="#8b5a3c"/>
+</svg>

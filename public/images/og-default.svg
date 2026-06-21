@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Dev Log</title>
+  <desc id="desc">Next.js 기반 개인 기술 블로그 Open Graph 이미지</desc>
+  <rect width="1200" height="630" fill="#f7fbff"/>
+  <path d="M0 0h1200v630H0z" fill="#f7fbff"/>
+  <path d="M0 0h1200v630H0z" fill="url(#grid)" opacity=".55"/>
+  <rect x="92" y="86" width="1016" height="458" rx="8" fill="#fff" stroke="#22252d" stroke-opacity=".12" stroke-width="3"/>
+  <rect x="132" y="126" width="88" height="88" rx="8" fill="#7ad7c4"/>
+  <text x="176" y="183" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="48" font-weight="700" fill="#22252d">D</text>
+  <text x="132" y="292" font-family="Pretendard, system-ui, sans-serif" font-size="76" font-weight="900" fill="#22252d">Dev Log</text>
+  <text x="132" y="360" font-family="Pretendard, system-ui, sans-serif" font-size="34" font-weight="600" fill="#22252d" opacity=".72">공부 기록과 일상을 쌓는 개인 기술 블로그</text>
+  <rect x="132" y="412" width="146" height="46" rx="8" fill="#ff8f7d" fill-opacity=".18" stroke="#ff8f7d" stroke-opacity=".45"/>
+  <text x="205" y="443" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="22" font-weight="700" fill="#22252d">Next.js</text>
+  <rect x="298" y="412" width="98" height="46" rx="8" fill="#7ad7c4" fill-opacity=".22" stroke="#7ad7c4" stroke-opacity=".55"/>
+  <text x="347" y="443" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="22" font-weight="700" fill="#22252d">MDX</text>
+  <rect x="416" y="412" width="144" height="46" rx="8" fill="#b66cff" fill-opacity=".14" stroke="#b66cff" stroke-opacity=".38"/>
+  <text x="488" y="443" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="22" font-weight="700" fill="#22252d">Shiki</text>
+  <rect x="878" y="210" width="128" height="128" fill="#8b5a3c" shape-rendering="crispEdges"/>
+  <rect x="846" y="178" width="48" height="48" fill="#8b5a3c" shape-rendering="crispEdges"/>
+  <rect x="990" y="178" width="48" height="48" fill="#8b5a3c" shape-rendering="crispEdges"/>
+  <rect x="902" y="242" width="80" height="56" fill="#c58a5a" shape-rendering="crispEdges"/>
+  <rect x="918" y="258" width="16" height="16" fill="#22252d" shape-rendering="crispEdges"/>
+  <rect x="950" y="258" width="16" height="16" fill="#22252d" shape-rendering="crispEdges"/>
+  <rect x="934" y="282" width="16" height="16" fill="#22252d" shape-rendering="crispEdges"/>
+  <defs>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0v24" fill="none" stroke="#22252d" stroke-opacity=".07" stroke-width="1"/>
+    </pattern>
+  </defs>
+</svg>
