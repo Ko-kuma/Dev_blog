@@ -136,8 +136,15 @@ export function getAllTags(): TagSummary[] {
   const tagMap = new Map<string, TagSummary>();
 
   for (const post of getAllPosts()) {
-    for (const tag of post.tags) {
+    const uniqueTags = new Set(post.tags.map((tag) => tag.trim()).filter(Boolean));
+
+    for (const tag of uniqueTags) {
       const slug = slugify(tag);
+
+      if (!slug) {
+        continue;
+      }
+
       const current = tagMap.get(slug);
 
       tagMap.set(slug, {

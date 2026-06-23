@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Github, Rss } from "lucide-react";
+import { Github, Instagram, Rss } from "lucide-react";
 import { siteConfig } from "@/lib/site";
 
 export function Footer() {
@@ -23,6 +23,15 @@ export function Footer() {
           >
             <Github aria-hidden size={15} />
             GitHub
+          </a>
+          <a
+            href="https://www.instagram.com/0rdinary_hz?igsh=MXgzZGVlZmIzZXlkdw%3D%3D&utm_source=qr"
+            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 transition hover:bg-coral/18 hover:text-ink dark:hover:text-paper"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Instagram aria-hidden size={15} />
+            Instagram
           </a>
         </div>
       </div>

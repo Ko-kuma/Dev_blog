@@ -14,7 +14,7 @@ export function formatDate(date: string) {
 
 export function slugify(value: string) {
   return value
-    .normalize("NFKD")
+    .normalize("NFC")
     .toLowerCase()
     .trim()
     .replace(/['"]/g, "")
