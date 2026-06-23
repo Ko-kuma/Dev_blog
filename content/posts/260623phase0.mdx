@@ -1,0 +1,194 @@
+---
+title: "개발환경 셋업"
+date: "2026-06-23"
+category: "기타"
+tags: ["개발환경", "VSCode", "Git", "Python", "NodeJS"]
+description: "첫 걸음은 Python, Node.js, Git, VSCode 설치부터 시작"
+thumbnail : "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+
+# 개발환경 셋업
+
+> 집을 짓기 전에 공터를 정리하는 단계입니다.
+> 코드를 한 줄이라도 작성하려면, 그 코드를 작성할 수 있는 개발 환경부터 만들어야합니다.
+
+---
+
+## 개발환경 셋업에서 배우는 것
+
+| 도구 | 역할 |
+| --- | --- |
+| VSCode | 코드를 작성하는 편집기 (개발자의 노트패드) |
+| Git + GitHub | 코드 변경 이력 관리 + 클라우드 저장소 |
+| Python 3.11+ | 백엔드(FastAPI)를 짜는 언어 |
+| Node.js LTS | 프론트엔드(Next.js)를 실행하는 환경 |
+| 터미널 | 명령어로 컴퓨터를 조종하는 도구 |
+
+<Callout>
+💡 참고 (클라우드 저장소)
+데이터를 인터넷을 통해 원격 서버에 저장하고 관리, 백업하는 모델
+</Callout>
+
+---
+
+## 1. 왜 환경 셋업이 먼저인가?
+
+> **비유:** 요리를 배우기 전에 칼, 도마, 냄비를 먼저 준비하는 것과 같습니다.
+> 도구없이 레시피를 외워봐야 요리를 할 수 없는 것 처럼 개발환경은 개발자가 코딩을 하기 위해 필요한 작업 공간입니다.
+> **개발 환경 = 개발자의 주방**
+
+- 코드를 작성하고 실행할 수 있는 기반을 만듭니다.
+- 추후 배울 모든 것 (FastAPI, Next.js, Docker) 이 이 환경 위에서 돌아갑니다.
+- 환경이 실타래 처럼 엉켜 있으면 에러의 원인을 찾기 매우 어려워집니다.
+- 처음에 제대로 셋업하면 이 후 수백 시간을 아낄 수 있습니다.
+
+---
+
+## 2. 개발환경 설치 시 체크리스트
+
+### ① VSCode (코드 에디터)
+
+VSCode는 코드를 작성하는 **"노트패드"의 개발자 버전**입니다.
+무료이고, 전 세계에서 가장 많이 쓰이는 코드 에디터입니다.
+
+다운로드 링크 : [https://code.visualstudio.com](https://code.visualstudio.com)
+
+설치 후, 아래 확장 프로그램을 설치하세요.
+VSCode 왼쪽 사이드바의 네모 4개 아이콘(Extensions)을 클릭하고 이름을 검색하면 됩니다.
+
+| 확장 프로그램 | 역할 | 우선순위 |
+| --- | --- | --- |
+| Korean Language Pack | VSCode 메뉴를 한국어로 바꿔줌 | 필수 |
+| Python | Python 자동완성 및 오류 감지 | 필수 |
+| Prettier | 저장 시 코드 자동 정렬 | 권장 |
+| GitLens | Git 변경 이력 시각화 | 권장 |
+| ESLint | JavaScript / TypeScript 오류 감지 | 권장 |
+
+---
+
+### ② Git + GitHub (버전 관리)
+
+Git은 코드의 **"저장 이력"** 을 관리하는 도구입니다.
+GitHub는 그 이력을 인터넷에 올려두는 **"클라우드 드라이브"** 입니다.
+포트폴리오 제출, 협업, 실수 복구 모두 Git / GitHub 로 합니다.
+
+**설치 순서:**
+
+1. [https://git-scm.com](https://git-scm.com) 에서 Git 설치
+2. [https://github.com](https://github.com) 에서 계정 생성 (무료)
+3. VSCode 터미널에서 `git --version` 입력 → 버전 번호가 뜨면 성공
+4. 이름과 이메일 설정 (아래 명령어 실행)
+
+```bash
+git config --global user.name  "YourName"
+git config --global user.email "you@example.com"
+```
+
+> **왜 이름·이메일을 설정하나요?**
+> Git은 코드를 저장할 때마다 "누가 저장했는지" 기록합니다.
+> 설정 안 하면 나중에 커밋(저장)할 때 오류가 납니다.
+
+---
+
+### ③ Python 3.11 이상
+
+Python은 우리가 배울 백엔드 **(FastAPI)의 언어**입니다.
+3.11 이상 버전을 설치해야 최신 문법과 성능을 쓸 수 있습니다.
+
+다운로드: [https://www.python.org/downloads](https://www.python.org/downloads)
+
+<Callout>
+⚠️ 주의: 설치 시 반드시 "Add Python to PATH" 체크박스에 체크!
+
+PATH란? 운영체제가 python 명령어를 어디서든 찾을 수 있게 해주는 설정입니다.
+체크 안 하면 터미널에서 python을 인식하지 못합니다.
+</Callout>
+
+---
+
+### ④ Node.js LTS 버전
+
+Node.js는 JavaScript를 브라우저 밖에서 실행하게 해주는 환경입니다.
+Next.js를 실행하려면 반드시 필요합니다.
+
+**LTS** = Long Term Support = **가장 안정적인 버전**을 뜻합니다.
+
+다운로드: [https://nodejs.org](https://nodejs.org) → **LTS 버튼** 클릭
+
+```bash
+node --version   # v20.x.x 이상이면 정상
+npm --version    # 10.x.x 이상이면 정상
+```
+
+---
+
+### ⑤ 터미널 (Terminal) 기본 사용법
+
+터미널은 마우스 대신 **"글자 명령어"로 컴퓨터를 조종하는 도구**입니다.
+VSCode 안에 내장 터미널이 있으므로 별도 설치가 필요 없습니다.
+
+단축키: `Ctrl + \`` (백틱) 으로 VSCode 터미널을 열 수 있습니다.
+
+<Callout>
+백틱(`)은 키보드 숫자 1 옆에 있는 키입니다. 맥북도 동일 위치입니다.
+주로 프로그래밍에서 특수한 문법을 표현하거나, 마크다운 문서를 작성할 때 사용합니다.
+</Callout>
+
+| 명령어 | 하는 일 | 예시 |
+| --- | --- | --- |
+| `pwd` | 현재 내 위치(폴더) 확인 | `/home/user/projects` |
+| `ls` | 현재 폴더 안 파일 목록 보기 | `ls -la` (숨김파일 포함) |
+| `cd 폴더명` | 해당 폴더로 이동 | `cd Desktop` |
+| `mkdir 이름` | 새 폴더 만들기 | `mkdir my-project` |
+| `clear` | 터미널 화면 청소 | 출력 내용을 지움 |
+| `Ctrl + C` | 실행 중인 프로그램 강제 종료 | 서버 멈출 때 사용 |
+
+---
+
+## 3. 설치 완료 확인
+
+아래 명령어를 터미널에 하나씩 입력하세요.
+숫자(버전 번호)가 나오면 **정상 설치된 것**입니다.
+
+```bash
+git --version    # git version 2.x.x
+python --version # Python 3.11.x 이상
+node --version   # v20.x.x 이상
+npm --version    # 10.x.x 이상
+```
+
+---
+
+## 4. 자주 하는 실수 & 해결법
+
+### "python"을 찾을 수 없습니다
+
+Python 설치 시 **"Add Python to PATH"** 를 체크하지 않은 경우입니다.
+Python을 재설치하고 반드시 체크하세요.
+
+### "node"를 찾을 수 없습니다
+
+Node.js 설치 후 **터미널을 완전히 껐다가 다시 열어보세요.**
+새 터미널을 열어야 PATH 변경이 적용됩니다.
+
+### VSCode에서 Python 확장이 작동 안 함
+
+`Ctrl+Shift+P` → **"Python: Select Interpreter"** 클릭 → 설치된 Python 경로 선택.
+
+### git config 설정을 빠뜨림
+
+나중에 커밋(코드 저장)할 때 오류가 납니다.
+지금 바로 이름과 이메일을 설정하세요.
+
+---
+
+## 5. 개발 환경 셋업 요약
+
+| 키워드 | 한 줄 정리 |
+| --- | --- |
+| **개발 환경** | 코드를 짓기 위한 공터 정리. 모든 것의 시작점 |
+| **VSCode** | 코드 편집기 + 확장 프로그램으로 기능 추가 |
+| **Git / GitHub** | 코드 변경 이력 관리 / 이력을 올려두는 클라우드 |
+| **Python 3.11+** | 백엔드(FastAPI)를 위한 언어 |
+| **Node.js LTS** | 프론트엔드(Next.js)를 실행하기 위한 환경 |
+| **터미널** | 개발자의 리모컨 — 명령어로 모든 것을 제어 |
