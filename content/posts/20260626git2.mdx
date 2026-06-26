@@ -1,0 +1,328 @@
+---
+title: "Git / GitHub : GitHub 연동부터 브랜치까지"
+date: "2026-06-26"
+category: "기타"
+tags: ["Git", "GitHub", "버전관리", "브랜치", "gitignore"]
+description: "git remote, push, pull, clone, .gitignore, 브랜치까지 — GitHub 연동"
+thumbnail:  "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+
+
+## 1. git과 GitHub
+
+## 참고 자료
+
+자료에서 사용하는 CS 용어 정리입니다.
+
+[Git / GitHub CS용어 정리 ](./20260626git2cs)
+
+[Git 개념과 커밋](./2620625git1)
+위 내용에서 Git은 **내 컴퓨터 안의 타임머신** 이라고 했습니다.
+GitHub는 그 타임머신을 **인터넷 위에 올려두는 창고**입니다.
+
+| 구분 | Git | GitHub |
+|---|---|---|
+| 위치 | 내 컴퓨터 (로컬) | 인터넷 (클라우드) |
+| 역할 | 버전 기록 관리 | 코드 저장 + 공유 + 포트폴리오 |
+| 비유 | 일기장 | 일기장을 보관하는 클라우드 금고 |
+| 없어도 되나? | 절대 안 됨 | 혼자 작업 시엔 없어도 됨 (하지만 필수 수준) |
+
+> GitHub 말고도 GitLab, Bitbucket 같은 서비스가 있어요.
+> 하지만 취업·포트폴리오·오픈소스 모두 GitHub가 업계 표준입니다.
+
+---
+
+## 2. GitHub 계정 & 레포 만들기
+
+### 2-1. 계정 만들기
+
+① **github.com** 접속 → Sign up 클릭
+② 이메일, 비밀번호, 사용자명(username) 입력
+③ 사용자명은 URL에 그대로 나와요 (`github.com/사용자명`) → 신중하게 정하세요
+④ 이메일 인증 완료
+
+<Callout>
+사용자명은 포트폴리오 URL이 됩니다. 본명·영문 닉네임처럼 깔끔하게 정하세요.
+나중에 바꿀 수 있지만 기존 링크가 전부 바뀌는 번거로움이 있어요.
+</Callout>
+
+### 2-2. 레포지토리(Repository) 만들기
+
+레포지토리(repo)는 **하나의 프로젝트 폴더**라고 생각하면 돼요.
+GitHub에서 새 레포를 만드는 방법은 두 가지입니다.
+
+| 방법 | 언제 쓰나 |
+|---|---|
+| GitHub 웹에서 만들고 → 로컬로 clone | 새 프로젝트 시작 시 (추천) |
+| 로컬에서 git init 후 → GitHub에 연결 | 이미 작업 중인 폴더가 있을 때 |
+
+**웹에서 레포 만들기 순서**
+
+① 로그인 후 우측 상단 **+** 버튼 → **New repository**
+② Repository name 입력 (예: `my-first-repo`)
+③ Public / Private 선택 — 포트폴리오용이면 Public
+④ **Add a README file** 체크 ✓ — 나중에 clone할 때 편해요
+⑤ **Create repository** 클릭
+
+---
+
+## 3. git remote — 로컬과 GitHub 연결
+
+로컬 저장소(내 컴퓨터)와 원격 저장소(GitHub)는 **자동으로 연결되지 않아요.**
+직접 연결 주소를 알려줘야 합니다. 그게 `git remote`입니다.
+
+```bash
+# GitHub 주소를 'origin'이라는 별명으로 등록
+git remote add origin https://github.com/사용자명/레포이름.git
+
+# 등록된 원격 저장소 확인
+git remote -v
+
+# 원격 저장소 주소 변경 (잘못 입력했을 때)
+git remote set-url origin https://github.com/사용자명/새레포이름.git
+
+# 원격 저장소 연결 해제
+git remote remove origin
+```
+<Callout>
+**origin**이란? — 원격 저장소에 붙이는 별명이에요.
+'origin'이 관례상 표준이라 그냥 쓰면 됩니다.
+다른 이름을 써도 되지만 팀 협업 시 혼란을 줄 수 있어요.
+</Callout>
+
+---
+
+## 4. git push / git pull
+
+| 명령어 | 방향 | 하는 일 |
+|---|---|---|
+| git push | 로컬 → GitHub | 내 커밋을 GitHub에 올리기 |
+| git pull | GitHub → 로컬 | GitHub의 최신 내용을 내 컴퓨터로 받아오기 |
+
+### git push
+
+```bash
+# 기본 사용법
+git push origin main
+
+# 처음 push할 때 -u 옵션 사용 (이후엔 git push만 해도 됨)
+git push -u origin main
+```
+
+`-u (--set-upstream)`: '앞으로 push/pull 기본값은 origin의 main 브랜치야'라고 등록하는 옵션.
+처음 한 번만 쓰면 이후엔 `git push`만 입력해도 됩니다.
+
+### git pull
+
+```bash
+# GitHub의 최신 내용 받아오기
+git pull origin main
+
+# -u 설정 후엔 이렇게만 해도 됨
+git pull
+```
+<Callout>
+협업 시 규칙: 작업 시작 전 항상 **git pull** 먼저!
+팀원이 올린 변경사항을 먼저 받아야 충돌(conflict)을 줄일 수 있어요.
+</Callout>
+
+---
+
+## 5. git clone — 저장소 복사해오기
+
+`git clone`은 GitHub에 있는 저장소를 **통째로 내 컴퓨터에 복사**하는 명령어예요.
+처음 프로젝트를 시작할 때, 또는 오픈소스 코드를 받아올 때 씁니다.
+
+```bash
+# 기본 사용법 (현재 폴더 안에 레포 이름으로 폴더가 생성됨)
+git clone https://github.com/사용자명/레포이름.git
+
+# 폴더 이름을 직접 지정해서 clone
+git clone https://github.com/사용자명/레포이름.git 내폴더이름
+
+# clone 후 자동으로 origin이 연결됨 (git remote add 안 해도 됨)
+git remote -v
+```
+
+| 상황 | 쓸 명령어 |
+|---|---|
+| 새 프로젝트를 GitHub에서 시작 | GitHub에서 레포 생성 → git clone |
+| 이미 로컬에 폴더가 있음 | git init → git remote add origin → git push |
+| 팀원 프로젝트에 합류 | git clone (URL은 팀원에게 받기) |
+
+---
+
+## 6. .gitignore — Git이 무시할 파일 목록
+
+모든 파일을 GitHub에 올리면 안 됩니다.
+**비밀번호, API 키, 자동 생성 파일**들은 올리면 절대 안 돼요.
+`.gitignore` 파일에 목록을 적어두면 Git이 그 파일들을 추적하지 않습니다.
+
+### 절대 올리면 안 되는 파일들
+
+| 파일/폴더 | 이유 |
+|---|---|
+| `.env` | API 키, DB 비밀번호 등 민감한 정보 |
+| `node_modules/` | 용량이 너무 큼 (수백 MB) — package.json으로 복원 가능 |
+| `__pycache__/` | Python이 자동 생성하는 캐시 파일 |
+| `.DS_Store` | Mac이 자동 생성하는 시스템 파일 |
+| `*.log` | 로그 파일 (빌드 시 자동 생성) |
+| `venv/` | Python 가상환경 — requirements.txt로 복원 가능 |
+
+### .gitignore 작성 예시
+
+```bash
+# 프로젝트 루트에 .gitignore 파일 생성
+touch .gitignore
+
+# 아래 내용을 .gitignore 파일 안에 작성
+
+# 환경변수 파일 (절대 올리면 안 됨)
+.env
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Node.js
+node_modules/
+
+# Mac 시스템 파일
+.DS_Store
+
+# 로그 파일
+*.log
+```
+
+> **gitignore.io** 사이트에서 기술 스택을 입력하면 .gitignore를 자동으로 생성해줍니다.
+> Python, Node, macOS 처럼 입력하면 완성된 내용을 바로 복사할 수 있습니다.
+
+---
+
+## 7. 브랜치 (Branch) — 독립 작업 공간
+
+브랜치는 **메인 코드를 건드리지 않고 독립적으로 작업할 수 있는 공간**이에요.
+마치 문서를 '다른 이름으로 저장'해서 수정하는 것과 비슷합니다.
+
+> 🌿 나무의 가지(Branch)를 생각해보세요.
+> 줄기(main)는 항상 배포 가능한 안정적인 코드.
+> 가지(branch)에서 새 기능을 개발하고, 완성되면 줄기에 합칩니다(merge).
+> 가지가 실패해도 줄기는 안전.
+
+### 핵심 명령어
+
+```bash
+# 현재 브랜치 목록 확인
+git branch
+
+# 새 브랜치 만들기
+git branch 브랜치이름
+
+# 브랜치 이동
+git checkout 브랜치이름
+
+# 만들고 바로 이동 (위 두 줄을 한 번에)
+git checkout -b 브랜치이름
+
+# 최신 방식 (Git 2.23+에서 추가된 명령어)
+git switch -c 브랜치이름    # 만들고 이동
+git switch 브랜치이름       # 이동만
+
+# main 브랜치로 돌아오기
+git checkout main
+
+# 브랜치 합치기 (main에서 실행해야 함)
+git merge 브랜치이름
+```
+
+### 브랜치 이름 관례
+
+| 브랜치 이름 | 설명 |
+|---|---|
+| `main` / `master` | 기본 브랜치 (배포용 안정 코드) |
+| `feature/기능이름` | 새 기능 개발 (예: feature/login) |
+| `fix/버그이름` | 버그 수정 (예: fix/login-error) |
+| `hotfix/이름` | 긴급 수정 |
+
+> 지금 수준에서는 브랜치 개념과 기본 명령어만 알면 충분.
+> merge conflict 해결, rebase, PR(Pull Request) 등은
+> 실제 프로젝트를 하면서 자연스럽게 익히게 됨.
+
+---
+
+## 8. 직접 해보기
+
+###  GitHub에서 만들고 clone하기
+
+```bash
+# STEP 1. GitHub에서 레포 생성 (웹에서 진행)
+#         Repository name: my-first-repo
+#         Add a README file: 체크
+#         Create repository 클릭
+
+# STEP 2. 로컬로 clone
+git clone https://github.com/사용자명/my-first-repo.git
+cd my-first-repo
+
+# STEP 3. README.md 수정
+#         에디터로 README.md를 열어서 자기소개 한 줄 추가
+
+# STEP 4. 변경사항 확인
+git status
+
+# STEP 5. 스테이지에 올리기
+git add README.md
+
+# STEP 6. 커밋
+git commit -m "README: 자기소개 추가"
+
+# STEP 7. push
+git push origin main
+
+# STEP 8. GitHub 웹에서 확인 — 변경된 README가 보이면 성공!
+```
+
+### 로컬 폴더를 GitHub에 연결하기
+
+```bash
+# STEP 1. 로컬 폴더 초기화
+mkdir my-project && cd my-project
+git init
+
+# STEP 2. 파일 만들기
+touch README.md
+
+# STEP 3. 커밋
+git add .
+git commit -m "첫 번째 커밋"
+
+# STEP 4. GitHub에서 빈 레포 생성 (README 체크 X)
+
+# STEP 5. 원격 저장소 연결
+git remote add origin https://github.com/사용자명/my-project.git
+
+# STEP 6. push (-u로 기본값 등록)
+git push -u origin main
+```
+
+---
+
+## 핵심
+
+| 명령어 | 하는 일 |
+|---|---|
+| `git remote add origin URL` | 로컬 저장소에 GitHub 주소 등록 |
+| `git remote -v` | 등록된 원격 저장소 확인 |
+| `git push origin main` | 로컬 커밋을 GitHub에 올리기 |
+| `git push -u origin main` | push + 기본값 등록 (처음 한 번) |
+| `git pull` | GitHub 최신 내용 받아오기 |
+| `git clone URL` | GitHub 저장소를 로컬로 복사 |
+| `.gitignore` | Git이 추적하지 않을 파일 목록 |
+| `git branch 이름` | 새 브랜치 만들기 |
+| `git checkout -b 이름` | 새 브랜치 만들고 이동 |
+| `git merge 이름` | 브랜치를 현재 브랜치에 합치기 |
+
+---
