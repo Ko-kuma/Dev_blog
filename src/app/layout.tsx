@@ -27,6 +27,9 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   authors: [{ name: siteConfig.author }],
   creator: siteConfig.author,
+   verification: {
+    google: "jx6GDIlqZdC4IY3T_EIxxBRs_YB9wcUXejvBm9As6yc",
+  },
   openGraph: {
     type: "website",
     locale: siteConfig.locale,
