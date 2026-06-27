@@ -1,0 +1,264 @@
+---
+title: "HTML / CSS CS용어 정리"
+date: "2026-06-27"
+category: "CS"
+tags: ["HTML", "CSS", "CS용어", "렌더링", "DOM"]
+description: "HTML/CSS CS  — DOM, 렌더링 파이프라인, 캐스케이딩, 박스 모델, 접근성"
+thumbnail : "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+
+## 참고 자료
+
+아래 자료에서 사용하는 CS 용어 정리입니다.
+
+[HTML / CSS 기초](./20260627HTTP,CSS)
+
+---
+
+## 1. 문서 구조 및 파싱
+
+### DOM (Document Object Model)
+
+**정의**: 브라우저가 HTML 문서를 파싱(해석)한 결과를 메모리에 올린
+**트리 구조의 객체 모델**입니다. HTML의 각 태그가 하나의 노드(Node)가 됩니다.
+
+**CS적 의의**:
+
+- **트리 자료구조**: DOM은 부모-자식 관계로 구성된 트리입니다.
+  `<html>`이 루트 노드, `<head>`와 `<body>`가 자식 노드예요.
+  JavaScript가 `document.querySelector()`로 요소를 찾는 것은
+  이 트리를 순회(traversal)하는 연산입니다.
+- **파싱(Parsing)**: 브라우저가 HTML 텍스트를 읽어 DOM 트리로 변환하는 과정이에요.
+  `<!DOCTYPE html>`은 파서에게 "이 문서는 HTML5 규칙으로 파싱하라"고 알리는 선언입니다.
+
+```
+document
+└── html
+    ├── head
+    │   ├── meta
+    │   └── title
+    └── body
+        ├── header
+        ├── main
+        └── footer
+```
+
+---
+
+### 렌더링 파이프라인 (Rendering Pipeline)
+
+**정의**: 브라우저가 HTML/CSS를 받아 화면에 픽셀을 그리기까지의 처리 단계입니다.
+
+**CS적 의의**:
+
+```
+HTML 파싱 → DOM 생성
+CSS 파싱  → CSSOM 생성
+             ↓
+        DOM + CSSOM = Render Tree
+             ↓
+        Layout (요소 크기/위치 계산)
+             ↓
+        Paint (픽셀 색상 채우기)
+             ↓
+        Composite (레이어 합성)
+```
+
+- **Reflow**: 요소의 크기나 위치가 바뀌면 Layout 단계부터 다시 계산합니다.
+  비용이 크기 때문에 `width`, `height`, `margin` 변경은 성능에 영향을 줍니다.
+- **Repaint**: 색상처럼 레이아웃에 영향 없는 속성만 바뀌면 Paint 단계만 다시 수행합니다.
+  `color`, `background-color` 변경이 이에 해당합니다.
+
+---
+
+## 2. CSS 핵심 개념
+
+### 캐스케이딩 (Cascading)
+
+**정의**: CSS에서 동일한 요소에 여러 스타일 규칙이 충돌할 때
+**우선순위를 결정하는 알고리즘**입니다.
+
+**CS적 의의**: 우선순위는 아래 순서로 결정됩니다.
+
+| 우선순위 | 종류 | 예시 |
+|---|---|---|
+| 1위 (최고) | `!important` | `color: red !important` |
+| 2위 | Inline 스타일 | `style="color: red"` |
+| 3위 | ID 선택자 | `#title { }` |
+| 4위 | 클래스 선택자 | `.red { }` |
+| 5위 | 태그 선택자 | `p { }` |
+| 6위 (최하) | 상속(Inheritance) | 부모에서 내려온 스타일 |
+
+같은 우선순위면 **나중에 선언된 규칙**이 이깁니다 (위에서 아래로 폭포처럼 흐름).
+
+---
+
+### 상속 (Inheritance)
+
+**정의**: 부모 요소의 CSS 속성이 자식 요소에 자동으로 전달되는 성질입니다.
+
+**CS적 의의**:
+
+- **상속되는 속성**: `color`, `font-size`, `font-family`, `line-height` 등 텍스트 관련 속성
+- **상속되지 않는 속성**: `margin`, `padding`, `border`, `width`, `height` 등 박스 관련 속성
+- `inherit` 키워드로 상속을 강제할 수 있고, `initial`로 기본값으로 초기화할 수 있습니다.
+
+---
+
+### 박스 모델 (Box Model)
+
+**정의**: HTML의 모든 요소를 직사각형 박스로 표현하는 CSS의 핵심 레이아웃 모델입니다.
+`content`, `padding`, `border`, `margin` 4겹으로 구성됩니다.
+
+**CS적 의의**:
+
+- **content-box (기본값)**: `width`가 content 영역만 포함합니다.
+  `padding`과 `border`가 추가되면 실제 렌더링 크기는 더 커집니다.
+- **border-box**: `width`에 `padding`과 `border`가 포함됩니다.
+  실무에서 `* { box-sizing: border-box; }`를 쓰는 이유예요.
+  크기 계산이 직관적으로 되어 레이아웃 버그를 줄입니다.
+
+---
+
+### 스태킹 컨텍스트 (Stacking Context)
+
+**정의**: `z-index`가 적용되는 3차원 렌더링 레이어의 독립적인 단위입니다.
+
+**CS적 의의**: `z-index`는 같은 스태킹 컨텍스트 안에서만 비교됩니다.
+`position: relative/absolute/fixed` + `z-index` 값이 있거나,
+`opacity < 1`, `transform` 등이 설정되면 새로운 스태킹 컨텍스트가 생성됩니다.
+모달, 드롭다운, 툴팁 등 레이어가 겹치는 UI를 구현할 때 핵심 개념이에요.
+
+---
+
+## 3. 레이아웃 알고리즘
+
+### Flexbox 레이아웃 알고리즘
+
+**정의**: 1차원 공간에서 자식 요소들의 크기와 위치를 동적으로 계산하는 레이아웃 모델입니다.
+
+**CS적 의의**:
+
+- **주축(Main Axis)과 교차축(Cross Axis)**: `flex-direction`이 주축을 결정합니다.
+  `row`면 가로가 주축, `column`이면 세로가 주축이에요.
+  `justify-content`는 주축을, `align-items`는 교차축을 정렬합니다.
+- **flex: 1의 의미**: `flex-grow: 1`, `flex-shrink: 1`, `flex-basis: 0`의 단축 표기입니다.
+  남은 공간을 균등하게 나눈다는 의미예요.
+
+---
+
+### Grid 레이아웃 알고리즘
+
+**정의**: 2차원 격자 구조에서 요소를 배치하는 레이아웃 모델입니다.
+
+**CS적 의의**:
+
+- **fr 단위**: fraction(분수)의 약자입니다. 사용 가능한 공간을 비율로 나눠요.
+  `grid-template-columns: 1fr 2fr`은 1:2 비율로 열을 나누는 것입니다.
+- **auto-fit vs auto-fill**: `repeat(auto-fit, minmax(250px, 1fr))`에서
+  `auto-fit`은 빈 열을 접어서 기존 아이템이 공간을 채우고,
+  `auto-fill`은 빈 열을 유지합니다.
+
+---
+
+## 4. 웹 표준 및 접근성
+
+### 시맨틱 마크업 (Semantic Markup)
+
+**정의**: HTML 태그를 시각적 표현이 아닌 **의미(Semantics)**에 따라 선택하는 방식입니다.
+
+**CS적 의의**:
+
+- **SEO (Search Engine Optimization)**: 검색 엔진은 DOM 트리를 파싱해
+  `<h1>`, `<article>`, `<nav>` 같은 시맨틱 태그로 페이지 구조를 이해합니다.
+  `<div>`만 쓰면 검색 엔진이 중요도를 파악하기 어려워요.
+- **접근성 (Accessibility, a11y)**: 스크린 리더(시각 장애인용 도구)는
+  시맨틱 태그를 기반으로 페이지를 읽어줍니다.
+  `<button>` 대신 `<div>`를 버튼처럼 쓰면 스크린 리더가 인식하지 못해요.
+
+---
+
+### 웹 표준 (Web Standards)
+
+**정의**: W3C(World Wide Web Consortium)와 WHATWG가 정의한
+HTML, CSS, JavaScript의 공식 명세(Specification)입니다.
+
+**CS적 의의**:
+
+- **크로스 브라우저 호환성**: Chrome, Firefox, Safari, Edge 등 브라우저마다
+  렌더링 엔진이 다릅니다 (Chromium, Gecko, WebKit, Blink 등).
+  웹 표준을 따르면 모든 브라우저에서 동일하게 동작합니다.
+- **점진적 향상 (Progressive Enhancement)**: 기본 기능은 모든 환경에서 동작하도록 하고,
+  최신 기능은 지원되는 환경에서만 추가하는 개발 전략입니다.
+
+---
+
+### 클라이언트 사이드 vs 서버 사이드
+
+**정의**: 코드가 실행되는 환경에 따른 구분입니다.
+
+| | 클라이언트 사이드 | 서버 사이드 |
+|---|---|---|
+| 실행 환경 | 브라우저 | 서버 |
+| 언어 | HTML, CSS, JS | Python, Node.js 등 |
+| 역할 | 화면 표시, 상호작용 | 데이터 처리, DB 접근 |
+| 보안 | 코드가 노출됨 | 코드가 숨겨짐 |
+
+HTML/CSS/JS는 전부 클라이언트 사이드 기술입니다.
+나중에 배울 FastAPI는 서버 사이드, Next.js는 두 가지를 모두 다룹니다.
+
+---
+
+## Vocabulary
+
+| 용어 | 원어 | 정의 |
+|---|---|---|
+| DOM | Document Object Model | 브라우저가 HTML을 파싱한 트리 구조의 객체 모델 |
+| 파싱 | Parsing | 텍스트를 읽어 구조화된 데이터(트리)로 변환하는 과정 |
+| 렌더링 | Rendering | DOM과 CSS를 화면의 픽셀로 변환하는 과정 |
+| Reflow | Reflow | 요소 크기/위치 변경 시 레이아웃을 재계산하는 것 |
+| Repaint | Repaint | 색상 등 시각적 속성만 변경 시 다시 그리는 것 |
+| 캐스케이딩 | Cascading | CSS 규칙 충돌 시 우선순위를 결정하는 알고리즘 |
+| 상속 | Inheritance | 부모 요소의 CSS 속성이 자식에게 전달되는 성질 |
+| 스태킹 컨텍스트 | Stacking Context | z-index가 적용되는 독립적인 렌더링 레이어 |
+| 시맨틱 마크업 | Semantic Markup | 의미에 따라 HTML 태그를 선택하는 방식 |
+| SEO | Search Engine Optimization | 검색 엔진에서 상위에 노출되도록 최적화하는 것 |
+| 접근성 | Accessibility (a11y) | 장애가 있는 사용자도 웹을 이용할 수 있도록 하는 것 |
+| 웹 표준 | Web Standards | W3C/WHATWG가 정의한 HTML/CSS/JS 공식 명세 |
+| 클라이언트 사이드 | Client Side | 브라우저에서 실행되는 코드와 처리 |
+| fr | fraction | Grid에서 사용 가능한 공간을 비율로 나누는 단위 |
+| 주축/교차축 | Main Axis / Cross Axis | Flexbox에서 정렬 기준이 되는 두 방향 |
+
+---
+
+## Key Questions
+
+**Q1.** `<div class="btn">클릭</div>`과 `<button>클릭</button>`이
+시각적으로 같아 보여도 `<button>`을 써야 하는 이유는?
+
+> **A.** 시맨틱 마크업과 접근성 때문입니다.
+> `<button>`은 브라우저가 기본적으로 키보드 포커스, Enter/Space 키 동작,
+> 스크린 리더 인식을 제공합니다.
+> `<div>`는 이 기능들이 없어서 JavaScript로 전부 직접 구현해야 하고,
+> 스크린 리더는 이를 버튼으로 인식하지 못합니다.
+
+---
+
+**Q2.** `box-sizing: border-box`를 전역으로 설정하는 이유는?
+
+> **A.** 기본값인 `content-box`에서는 `width: 200px; padding: 20px`이면
+> 실제 렌더링 크기가 240px이 됩니다.
+> `border-box`로 설정하면 `width: 200px`이 padding과 border를 포함한 크기가 되어
+> 실제 렌더링도 200px입니다.
+> 레이아웃 계산이 직관적이 되어 크기 관련 버그를 크게 줄일 수 있습니다.
+
+---
+
+**Q3.** CSS `transition`과 JavaScript로 직접 스타일을 바꾸는 것의 성능 차이는?
+
+> **A.** `transition`은 브라우저가 GPU 가속을 활용해 Composite 단계에서만
+> 처리할 수 있는 속성(`transform`, `opacity`)에 적용하면 Reflow/Repaint 없이
+> 부드럽게 동작합니다.
+> 반면 JS로 `width`나 `margin`을 바꾸면 매 프레임마다 Reflow가 발생해
+> 성능이 저하됩니다. 애니메이션은 `transform`과 `opacity` 위주로 구현하는 게
+> 성능상 유리한 이유예요.
