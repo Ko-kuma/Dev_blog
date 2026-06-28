@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookOpenText, Home, Tags } from "lucide-react";
+import { DailyVisitorCount } from "@/components/daily-visitor-count";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
@@ -40,7 +41,10 @@ export function Header() {
           })}
         </nav>
 
-        <ThemeToggle />
+        <div className="flex items-center gap-2">
+          <DailyVisitorCount className="hidden md:inline-flex" />
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );
