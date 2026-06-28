@@ -89,19 +89,39 @@ export function getPostSlugs() {
     return [];
   }
 
-  return fs
-    .readdirSync(postsDirectory)
-    .filter((file) => file.endsWith(".mdx"))
-    .map((file) => file.replace(/\.mdx$/, ""));
+  const result: string[] = [];
+
+  function walk(dir: string) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        walk(path.join(dir, entry.name));
+      } else if (entry.name.endsWith(".mdx")) {
+        result.push(entry.name.replace(/\.mdx$/, ""));
+      }
+    }
+  }
+
+  walk(postsDirectory);
+  return result;
 }
 
 export function getPostBySlug(slug: string): Post | null {
   const realSlug = slug.replace(/\.mdx$/, "");
-  const fullPath = path.join(postsDirectory, `${realSlug}.mdx`);
 
-  if (!fs.existsSync(fullPath)) {
+  function findFile(dir: string): string | null {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        const found = findFile(path.join(dir, entry.name));
+        if (found) return found;
+      } else if (entry.name === `${realSlug}.mdx`) {
+        return path.join(dir, entry.name);
+      }
+    }
     return null;
   }
+
+  const fullPath = findFile(postsDirectory);
+  if (!fullPath) return null;
 
   const raw = fs.readFileSync(fullPath, "utf8");
   const { data, content } = parsePostFile(raw);
