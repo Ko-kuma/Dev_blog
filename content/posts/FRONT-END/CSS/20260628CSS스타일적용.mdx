@@ -15,10 +15,10 @@ thumbnail : ""
 [HTML / CSS 용어 정리](/posts/20260627HTTP,CSScs)  
 
 [HTML실습](/posts/20260627HTTP실습)
+
 ---
 
 ## 들어가기전  
-
 
 CSS코드는 어디에 써도 동작은 하지만 관례상 아래의 순서로 작성
 
@@ -44,11 +44,12 @@ input { }
 
 /* 5. 반응형 (항상 맨 마지막) */
 @media (max-width: 768px) { }
-
 ```
+
 ---
 
-## *{... }모든 요소 css 적용
+## * 모든 요소 CSS 적용
+
 ```css
 /* 기본 리셋*/
 /* *{...  }모든 html요소에 한번에 스타일 적용  */
@@ -61,9 +62,12 @@ margin:0;
 padding:0;
 }
 ```
+
+![적용 이미지](https://res.cloudinary.com/dkoelj2r2/image/upload/v1782651399/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-28_183922_alivo2.png)
+
 ---
 
-## body{} 전체 화면의 기본 글꽅 뼈대(틀)을 잡는 역할
+## body 전체 화면의 기본 글꼴 뼈대(틀)을 잡는 역할
 
 ```css
 /*전체 폰트, 줄간격 설정*/
@@ -76,11 +80,14 @@ body{
     /*글자 색상 설정(#333은 어두운 회색)*/
     color:#333;
 }
-
 ```
+
+![적용 이미지](https://res.cloudinary.com/dkoelj2r2/image/upload/v1782651425/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-28_183944_sujivl.png)
+
 ---
 
-## nav{... }네비게이션 
+## nav 네비게이션
+
 ```css
 nav{
     /*내부 요소들을 가로로 나란히 정렬*/
@@ -89,7 +96,7 @@ nav{
     justify-content: space-between;
     /*내부 요소들을 수직(상하) 중앙 정렬*/
     align-items : center;
-    /*안쪽 여백 설정(위 16픽셀, 좌우 40픽셀*/
+    /*안쪽 여백 설정(위 16픽셀, 좌우 40픽셀)*/
     padding: 16px 40px;
     /*백그라운드 컬러 어두운 진회색 배경지정*/
     background-color: #2D333B;
@@ -101,8 +108,12 @@ nav{
     top : 0 ;
 }
 ```
+
+![적용 이미지](https://res.cloudinary.com/dkoelj2r2/image/upload/v1782651442/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-28_184000_cvwmzf.png)
+
 ---
-##  nav ul{... } 내비게이션 메뉴 목록 설
+
+## nav ul 내비게이션 메뉴 목록 설정
 
 ```css
 nav ul{
@@ -115,8 +126,11 @@ nav ul{
 }
 ```
 
+![적용 이미지](https://res.cloudinary.com/dkoelj2r2/image/upload/v1782651466/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-28_192022_r8std5.png)
+
 ---
-## nav a{... } 내비게이션 링크(a)설정
+
+## nav a 내비게이션 링크 설정
 
 ```css
 nav a{
@@ -126,9 +140,13 @@ nav a{
     text-decoration:none;
 }
 ```
+
+![적용 이미지](https://res.cloudinary.com/dkoelj2r2/image/upload/v1782651510/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-28_192115_m1aaen.png)
+
 ---
 
-## nav a:hover {...} 내비게이션 호버 효과(커서를 어떤요소위에 올렸을 때 나타나는 시각적 반응)
+## nav a:hover 내비게이션 호버 효과 (커서를 요소 위에 올렸을 때 나타나는 시각적 반응)
+
 ```css
 nav a:hover {
   /* 마우스를 올렸을 때 요소를 70%만큼만 보이게 하여 살짝 흐려지는 효과를 줌 */
@@ -139,10 +157,11 @@ nav a:hover {
 }
 ```
 
+![적용 이미지](https://res.cloudinary.com/dkoelj2r2/image/upload/v1782651510/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-28_192115_m1aaen.png)
+
 ---
 
 ## 본문 설정
-
 
 ```css
 /* 섹션 공통 */
@@ -207,15 +226,19 @@ footer {
   font-size: 14px;
 }
 ```
+
+![적용 이미지](https://res.cloudinary.com/dkoelj2r2/image/upload/v1782651612/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-28_192734_ohhyqk.png)
+![적용 이미지](https://res.cloudinary.com/dkoelj2r2/image/upload/v1782651614/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-28_192741_guyeyv.png)
+
 ---
 
-## 반응형 
+## 반응형
 
 ```css
 /* 반응형 — 항상 CSS 파일의 맨 마지막에 위치해야 작동 순서가 꼬이지 않음 */
 @media (max-width: 768px) {
   /* 브라우저 가로 폭이 768px 이하(태블릿, 모바일 화면)일 때 적용되는 스타일 */
-  
+
   nav {
     /* 메뉴 항목들을 가로가 아닌 세로 방향으로 정렬 */
     flex-direction: column;
@@ -247,6 +270,4 @@ footer {
 기억을 못해도, 느려도  
 
 오늘 하루 무언가 기록했고, 만들었다라는 것에 자부심을 가지기.
-
-
 </Callout>
