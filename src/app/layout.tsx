@@ -78,6 +78,7 @@ export default function RootLayout({
             <main className="flex-1">{children}</main>
             <Footer />
           </div>
+          {process.env.VERCEL ? <script defer src="/_vercel/insights/script.js" /> : null}
         </ThemeProvider>
       </body>
     </html>
