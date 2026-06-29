@@ -1,0 +1,527 @@
+---
+title: JavaScript 기초 이론
+date: 2026-06-29
+category: "Front-End"
+tags: [JavaScript, 프론트엔드, 기초, DOM, 비동기]
+description:  JavaScript 기초 이론 — JS란 무엇인지부터 비동기 개념.
+thumbnail:"https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+## 참고 자료
+
+자료에서 사용하는 CS 용어 정리입니다.
+
+[JS CS용어정리](/posts/20260629jscs)
+
+---
+
+
+## JavaScript?
+
+처음 웹은 단순한 **문서**였으며
+HTML로 글을 쓰고, CSS로 꾸미는 것이 전부였습니다.
+
+그런데 사람들은 원했습니다.
+- 버튼을 클릭하면 뭔가 바뀌는 것
+- 입력한 값을 검사하는 것
+- 페이지를 새로 고침하지 않아도 내용이 업데이트되는 것
+
+이런 **"행동(동작)"** 을 담당하는 언어가 필요해졌고,  
+1995년 넷스케이프(Netscape) 브라우저에서 **Brendan Eich**가 단, 10일 만에 만든 것이 JavaScript입니다.
+
+---
+
+### HTML / CSS / JS 역할 비교
+
+| 역할 | 언어 | 비유 |
+|------|------|------|
+| 구조 (뼈대) | HTML | 집의 골조 |
+| 스타일 (꾸밈) | CSS | 벽지, 인테리어 |
+| 행동 (동작) | JavaScript | 전기, 수도, 엘리베이터 |
+
+HTML만 있으면 내용은 있지만 아무것도 못합니다.  
+CSS까지 더하면 예쁘게 보이지만 여전히 정적입니다.  
+JS를 더하면 비로소 **사용자와 상호작용**할 수 있는 웹이 됩니다.
+
+---
+
+### JS를 HTML에 연결하는 방법 — `<script>` 태그
+
+JavaScript는 별도의 `.js` 파일로 작성하고, HTML에서 `<script>` 태그로 불러옵니다.  
+CSS를 `<link>` 태그로 연결했던 것과 같은 개념입니다.
+
+```html
+<!-- CSS 연결 방식 — link 태그, rel="stylesheet"로 CSS 파일임을 알려줌 -->
+<link rel="stylesheet" href="style.css">
+
+<!-- JS 연결 방식 — script 태그, src 속성에 JS 파일 경로를 넣음 -->
+<script src="app.js"></script>
+```
+
+- `<link>` 태그는 CSS 파일을 연결할 때 사용하고, `rel="stylesheet"`로 파일 종류를 알려줍니다.  
+- `<script>` 태그는 JS 파일을 연결할 때 사용하고, `src` 속성에 파일 경로를 넣으면 브라우저가 읽어서 실행합니다.
+
+---
+
+### `<script>` 태그 위치가 왜 중요한가?
+
+브라우저는 HTML을 **위에서 아래로 순서대로** 읽습니다.  
+`<script>` 태그를 만나는 순간 JS를 즉시 실행하기 때문에, 위치가 잘못되면 문제가 생깁니다.
+
+```html
+<!--  잘못된 방법 — head 안에 바로 넣기 -->
+<head>
+  <script src="app.js"></script>  <!-- JS가 여기서 실행됨 -->
+</head>
+<body>
+  <h1 id="title">안녕하세요</h1>  <!-- 아직 존재하지 않는 상태! -->
+</body>
+```
+
+JS가 실행되는 시점에 `<h1>`이 아직 만들어지지 않았기 때문에,  
+JS가 `<h1>`을 찾으려 해도 존재하지 않아 오류가 납니다.
+
+```html
+<!-- 올바른 방법 1 — body 맨 아래에 넣기 -->
+<body>
+  <h1 id="title">안녕하세요</h1>  <!-- HTML이 먼저 생성됨 -->
+  <script src="app.js"></script>   <!-- 그 다음 JS 실행 -->
+</body>
+```
+
+```html
+<!-- 올바른 방법 2 — defer 속성 사용 (권장) -->
+<head>
+  <script src="app.js" defer></script>  <!-- head에 있어도 괜찮음 -->
+</head>
+<body>
+  <h1 id="title">안녕하세요</h1>
+</body>
+```
+
+> **`defer`란?**  
+> "HTML을 다 읽은 후에 JS를 실행해라"는 속성입니다.  
+> `<script>` 태그를 head에 넣더라도 HTML이 모두 로드된 뒤에 실행되므로 가장 권장되는 방법입니다.
+
+---
+
+### 브라우저가 JS를 실행하는 방식 — JS 엔진과 V8
+
+브라우저(Chrome, Firefox 등)에는 **JS 엔진**이 내장되어 있습니다.
+
+> **JS 엔진이란?**  
+> JavaScript 코드를 읽고 실행하는 프로그램입니다.  
+> Chrome은 **V8** 엔진을 사용하고, Node.js(서버에서 JS를 실행하는 환경)도 이 V8 엔진을 기반으로 만들어졌습니다.
+
+브라우저가 HTML 파일을 읽을 때의 전체 순서:
+
+```
+HTML 파일 읽기 → CSS 적용 → JS 실행 → 화면 렌더링
+```
+
+---
+
+## 기본 문법
+
+### 변수 (Variable)
+
+변수는 **값을 담는 상자**입니다.
+
+```js
+// let — 값이 바뀔 수 있는 변수
+let age = 28;
+age = 29; // 변경 가능
+
+// const — 값이 바뀌지 않는 변수 (상수)
+const name = "Heejin";
+// name = "다른이름"; // 오류 발생 — 변경 불가
+
+// var — 예전 방식. 현재는 사용 비권장
+var oldWay = "쓰지 마세요";
+```
+
+> **왜 `const`를 우선 사용하나요?**  
+> 값이 의도치 않게 변경되는 실수를 방지합니다.  
+> 코드를 읽는 사람이 "이 값은 바뀌지 않는다"는 것을 바로 알 수 있습니다.  
+> 기본은 `const`, 나중에 값을 바꿔야 할 때만 `let`을 씁니다.
+
+---
+
+### 자료형 (Data Type)
+
+```js
+// 문자열 (String) — 따옴표로 감싼 텍스트
+const greeting = "안녕하세요";
+const name = '희진';
+const template = `이름: ${name}`; // 백틱(`) — 변수 삽입 가능
+
+// 숫자 (Number)
+const age = 28;
+const price = 9.99;
+
+// 불리언 (Boolean) — 참(true) 또는 거짓(false)
+const isLoggedIn = true;
+const hasError = false;
+
+// null — 값이 "없음"을 명시적으로 표현
+const empty = null;
+
+// undefined — 값이 아직 할당되지 않은 상태
+let notYet;
+console.log(notYet); // undefined
+```
+
+> **null vs undefined 차이:**  
+> `null` = "여기에 값이 없다"고 개발자가 직접 정한 것  
+> `undefined` = 아무것도 안 넣었을 때 JS가 자동으로 넣어주는 것
+
+---
+
+### 연산자
+
+```js
+// 산술 연산자
+console.log(10 + 3);  // 13
+console.log(10 - 3);  // 7
+console.log(10 * 3);  // 30
+console.log(10 / 3);  // 3.333...
+console.log(10 % 3);  // 1 (나머지)
+
+// 비교 연산자
+// == (느슨한 비교) — 자료형이 달라도 값만 같으면 true
+console.log(1 == "1");   // true ← 위험!
+
+// === (엄격한 비교) — 값과 자료형 모두 같아야 true (권장)
+console.log(1 === "1");  // false
+console.log(1 === 1);    // true
+```
+
+> **왜 `===`을 써야 하나요?**  
+> `==`는 자동으로 자료형을 변환해서 비교하기 때문에 예상치 못한 결과가 나올 수 있습니다.  
+> `===`는 자료형까지 정확히 비교하므로 항상 이것을 사용합니다.
+
+---
+
+### 조건문 (if / else)
+
+```js
+const score = 85;
+
+if (score >= 90) {
+  // 90 이상이면
+  console.log("A학점");
+} else if (score >= 80) {
+  // 80 이상 90 미만이면
+  console.log("B학점");
+} else {
+  // 그 외 모든 경우
+  console.log("C학점 이하");
+}
+
+// 결과: "B학점"
+```
+
+---
+
+### 반복문 (for / while)
+
+```js
+// for 반복문 — 횟수가 정해진 경우
+for (let i = 1; i <= 5; i++) {
+  // i를 1부터 시작해서 5 이하일 때까지 1씩 증가시키며 반복
+  console.log(i); // 1, 2, 3, 4, 5 출력
+}
+
+// while 반복문 — 조건이 맞는 동안 계속 반복
+let count = 0;
+while (count < 3) {
+  console.log("반복 중:", count);
+  count++; // count를 1 증가 (count = count + 1과 같음)
+}
+// 결과: "반복 중: 0", "반복 중: 1", "반복 중: 2"
+```
+
+---
+
+### 함수 (Function)
+
+함수는 **반복해서 사용할 코드 묶음**입니다.
+
+```js
+// 함수 선언 방식
+function greet(name) {
+  // name이라는 값을 받아서
+  return `안녕하세요, ${name}님!`; // 이 문자열을 반환
+}
+
+console.log(greet("희진")); // "안녕하세요, 희진님!"
+console.log(greet("철수")); // "안녕하세요, 철수님!"
+
+
+// 화살표 함수 (Arrow Function) — 더 짧게 쓰는 방식
+const greet2 = (name) => {
+  return `안녕하세요, ${name}님!`;
+};
+
+// 한 줄로 더 줄이기 (return 생략 가능)
+const greet3 = (name) => `안녕하세요, ${name}님!`;
+```
+
+> **언제 어떤 걸 쓰나요?**  
+> 일반 함수 선언: 코드 어디서든 호출 가능 (호이스팅이 됨)  
+> 화살표 함수: 짧고 간결, 현대적인 코드에서 많이 사용
+
+---
+
+## DOM 조작
+
+### DOM이란?
+
+> **DOM (Document Object Model)**  
+> 브라우저가 HTML 파일을 읽고 나서 만들어내는 **"HTML의 지도"** 입니다.
+
+브라우저는 HTML을 읽으면서 각 태그를 **트리 구조**로 변환합니다.
+
+```
+document
+└── html
+    ├── head
+    │   └── title
+    └── body
+        ├── header
+        │   └── nav
+        └── main
+            └── section
+```
+
+JavaScript는 이 DOM을 통해 HTML 요소를 찾고, 바꾸고, 추가하고, 삭제할 수 있습니다.
+
+---
+
+### 요소 선택하기
+
+```js
+// CSS 선택자 방식으로 요소 하나 선택
+const title = document.querySelector("h1");
+const aboutSection = document.querySelector("#about");
+const navLinks = document.querySelector("nav a");
+
+// 여러 개 선택 (배열처럼 반환)
+const allLinks = document.querySelectorAll("nav a");
+// allLinks[0], allLinks[1] ... 처럼 접근 가능
+```
+
+---
+
+### 텍스트·스타일 변경하기
+
+```js
+const title = document.querySelector("h1");
+
+// 텍스트 내용 바꾸기
+title.textContent = "반갑습니다!";
+
+// HTML 태그 포함해서 바꾸기
+title.innerHTML = "<span>반갑습니다!</span>";
+
+// 인라인 스타일 변경
+title.style.color = "blue";
+title.style.fontSize = "60px";
+```
+
+---
+
+### 클래스 추가 / 제거 (classList)
+
+CSS에서 미리 클래스를 만들어두고, JS로 붙였다 뗐다 하는 방식이 더 깔끔합니다.
+
+```css
+/* CSS에서 미리 정의 */
+.highlight {
+  background-color: yellow;
+  font-weight: bold;
+}
+```
+
+```js
+const title = document.querySelector("h1");
+
+title.classList.add("highlight");    // 클래스 추가
+title.classList.remove("highlight"); // 클래스 제거
+title.classList.toggle("highlight"); // 있으면 제거, 없으면 추가
+title.classList.contains("highlight"); // 있는지 확인 (true/false)
+```
+
+---
+
+### 이벤트 리스너 (addEventListener)
+
+이벤트란 **사용자의 행동**입니다. (클릭, 키보드 입력, 마우스 이동 등)
+
+```js
+const button = document.querySelector("button");
+
+// "button이 클릭되면 이 함수를 실행해라"
+button.addEventListener("click", function () {
+  console.log("버튼이 클릭됐어요!");
+});
+
+// 화살표 함수로도 가능
+button.addEventListener("click", () => {
+  alert("클릭!");
+});
+```
+
+**자주 쓰는 이벤트 종류:**
+
+| 이벤트 | 발생 시점 |
+|--------|----------|
+| `click` | 마우스 클릭 |
+| `mouseover` | 마우스를 요소 위에 올렸을 때 |
+| `keydown` | 키보드를 눌렀을 때 |
+| `input` | 입력값이 바뀔 때 |
+| `scroll` | 스크롤할 때 |
+| `DOMContentLoaded` | HTML이 모두 로드됐을 때 |
+
+---
+
+## 비동기 기초
+
+### 동기(Synchronous) vs 비동기(Asynchronous)
+
+> **동기** = 순서대로, 하나가 끝나야 다음 것을 시작  
+> **비동기** = 기다리지 않고 다음 것을 먼저 시작
+
+**실생활 비유:**
+- 동기: 카페에서 내 커피가 나올 때까지 카운터 앞에 서서 기다리는 것
+- 비동기: 진동벨을 받고 자리에 앉아서 다른 일을 하다가 벨이 울리면 가는 것
+
+```js
+// 동기 코드 — 순서대로 실행
+console.log("1번");
+console.log("2번");
+console.log("3번");
+// 결과: 1번, 2번, 3번 (순서대로)
+
+// 비동기 코드 — setTimeout은 기다리지 않고 다음 줄로 넘어감
+console.log("1번");
+setTimeout(() => {
+  console.log("2번 (2초 후)");
+}, 2000); // 2000ms = 2초 뒤에 실행
+console.log("3번");
+// 결과: 1번, 3번, 2번 (2번이 나중에 출력!)
+```
+
+---
+
+### 콜백 함수 (Callback Function)
+
+콜백이란 **"나중에 실행해 줄 함수를 미리 전달하는 것"** 입니다.
+
+```js
+function 주문하기(메뉴, 완료되면) {
+  console.log(메뉴 + " 주문 완료");
+  // 커피가 준비되면 완료되면 함수를 호출
+  setTimeout(() => {
+    완료되면(메뉴); // 여기서 콜백 실행
+  }, 3000);
+}
+
+주문하기("아메리카노", (메뉴) => {
+  console.log(메뉴 + " 나왔습니다!");
+});
+// 결과: "아메리카노 주문 완료" → 3초 후 → "아메리카노 나왔습니다!"
+```
+
+---
+
+### setTimeout / setInterval
+
+```js
+// setTimeout — 일정 시간 후 한 번만 실행
+setTimeout(() => {
+  console.log("3초 뒤에 한 번 실행");
+}, 3000);
+
+// setInterval — 일정 시간마다 반복 실행
+const timer = setInterval(() => {
+  console.log("1초마다 반복");
+}, 1000);
+
+// 반복 멈추기
+clearInterval(timer);
+```
+
+---
+
+### Promise — 비동기 처리의 약속
+
+> **Promise**란 "나중에 결과를 줄게"라는 **약속 객체**입니다.  
+> 성공(resolve)하면 `.then()`, 실패(reject)하면 `.catch()`가 실행됩니다.
+
+```js
+// Promise 만들기
+const 커피주문 = new Promise((resolve, reject) => {
+  const 성공 = true;
+
+  if (성공) {
+    resolve("아메리카노 완성!"); // 성공 시
+  } else {
+    reject("재료 부족으로 실패"); // 실패 시
+  }
+});
+
+// Promise 사용하기
+커피주문
+  .then((결과) => {
+    console.log(결과); // "아메리카노 완성!"
+  })
+  .catch((에러) => {
+    console.log(에러); // 실패 시 "재료 부족으로 실패"
+  });
+```
+
+---
+
+### async / await — Promise를 더 읽기 쉽게
+
+`async/await`는 Promise를 **동기 코드처럼 읽히게** 만들어주는 문법입니다.
+
+```js
+// Promise 방식 (then/catch 체이닝)
+fetch("https://api.example.com/data")
+  .then((response) => response.json())
+  .then((data) => console.log(data))
+  .catch((error) => console.log(error));
+
+// async/await 방식 (같은 동작, 더 읽기 쉬움)
+async function 데이터가져오기() {
+  try {
+    // await: "이게 끝날 때까지 기다려라"
+    const response = await fetch("https://api.example.com/data");
+    const data = await response.json(); // JSON으로 변환
+    console.log(data);
+  } catch (error) {
+    // 오류가 나면 여기서 처리
+    console.log("오류 발생:", error);
+  }
+}
+
+데이터가져오기();
+```
+
+> **왜 async/await를 쓰나?**  
+> `.then().then().then()` 처럼 이어지는 구조는 코드가 깊어질수록 읽기 어렵습니다.  
+> `async/await`는 위에서 아래로 순서대로 읽히기 때문에 훨씬 직관적입니다.
+
+---
+
+## 요약
+
+| 단계 | 핵심 개념 | 한 줄 요약 |
+|------|----------|-----------|
+| 0단계 | JS란 무엇인가 | HTML=뼈대, CSS=옷, JS=행동. defer로 head에 넣기 |
+| 1단계 | 기본 문법 | const 우선, ===으로 비교, 화살표 함수 익히기 |
+| 2단계 | DOM 조작 | querySelector로 잡고, addEventListener로 반응 |
+| 3단계 | 비동기 | async/await로 기다리고, try/catch로 오류 처리 |
+
+---

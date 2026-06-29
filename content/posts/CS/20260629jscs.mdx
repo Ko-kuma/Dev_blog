@@ -1,0 +1,448 @@
+---
+title: "JavaScript 기초 CS용어 정리"
+date: "2026-06-29"
+category: "CS"
+tags: ["JavaScript", "CS용어", "DOM", "비동기", "V8"]
+description: "JavaScript 기초 — 런타임, JS 엔진, 호이스팅, DOM, 이벤트 루프, Promise, async/await"
+thumbnail:"https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+
+## 참고 자료
+
+아래 자료에서 사용하는 CS 용어 정리입니다.
+
+[JavaScript 기초 이론](/posts/Javascript)
+
+---
+
+## 1. JavaScript 실행 환경
+
+### 런타임 (Runtime)
+
+**정의**: 프로그램이 실제로 **실행되는 환경**입니다.
+JavaScript의 런타임은 브라우저(Chrome, Firefox 등)이고,
+서버에서 실행할 때는 Node.js가 런타임이 됩니다.
+
+**CS적 의의**:
+
+- **컴파일 언어 vs 인터프리터 언어**: C, Java 같은 언어는 실행 전에 기계어로 미리 번역(컴파일)합니다.
+  JavaScript는 인터프리터 언어로, 런타임(브라우저)이 코드를 한 줄씩 읽으면서 바로 실행합니다.
+- **런타임 환경의 차이**: 브라우저 런타임은 `document`, `window` 같은 객체를 제공하고,
+  Node.js 런타임은 파일 시스템(`fs`), 네트워크 접근 같은 서버 기능을 제공합니다.
+  같은 JavaScript 문법이지만 실행 환경에 따라 쓸 수 있는 기능이 달라요.
+
+---
+
+### JS 엔진 (JavaScript Engine)
+
+**정의**: 브라우저 안에 내장된 **JavaScript 코드를 읽고 실행하는 프로그램**입니다.
+
+**CS적 의의**:
+
+- **V8**: Google이 만든 JS 엔진. Chrome 브라우저와 Node.js에서 사용합니다.
+- **SpiderMonkey**: Firefox가 사용하는 JS 엔진.
+- **JIT 컴파일 (Just-In-Time Compilation)**: 초기 JS 엔진은 코드를 한 줄씩 해석해서 느렸습니다.
+  현대 JS 엔진은 자주 실행되는 코드를 기계어로 컴파일해서 캐싱하는 JIT 방식을 사용해
+  실행 속도를 크게 높였습니다. V8이 이 방식을 사용합니다.
+
+---
+
+### 콜 스택 (Call Stack)
+
+**정의**: JavaScript가 **함수 호출을 추적하는 자료구조**입니다.
+함수가 호출되면 스택에 쌓이고, 실행이 끝나면 제거됩니다.
+
+**CS적 의의**:
+
+- **스택(Stack)**: 마지막에 들어온 것이 먼저 나가는 자료구조(LIFO, Last In First Out)입니다.
+  접시를 쌓는 것과 같아요. 가장 위에 있는 함수가 현재 실행 중인 함수입니다.
+- **싱글 스레드**: JavaScript는 콜 스택이 하나뿐입니다.
+  즉, 한 번에 하나의 작업만 처리할 수 있어요.
+  이것이 비동기 처리가 필요한 근본적인 이유입니다.
+- **스택 오버플로우(Stack Overflow)**: 함수가 자기 자신을 무한히 호출(재귀)하면
+  콜 스택이 꽉 차서 오류가 납니다. 에러 메시지에 "Maximum call stack size exceeded"가 뜨면 이 경우예요.
+
+```js
+function a() {
+  b(); // b를 호출
+}
+function b() {
+  c(); // c를 호출
+}
+function c() {
+  console.log("실행!");
+}
+
+a();
+// 콜 스택: a → b → c → (c 종료) → (b 종료) → (a 종료)
+```
+
+---
+
+### defer
+
+**정의**: `<script>` 태그의 속성으로, **HTML 파싱이 끝난 후 JS를 실행**하도록 미루는 명령입니다.
+
+**CS적 의의**:
+
+- 브라우저는 HTML을 위에서 아래로 파싱합니다.
+  `<script>` 태그를 만나면 파싱을 멈추고 JS를 먼저 실행합니다.
+  이때 JS가 아직 생성되지 않은 DOM 요소를 참조하면 오류가 납니다.
+- `defer`를 사용하면 JS 파일을 백그라운드에서 다운로드하면서 HTML 파싱을 계속하고,
+  파싱이 완전히 끝난 후에 JS를 실행합니다.
+  `<head>`에 넣어도 안전한 이유입니다.
+
+```html
+<!-- defer 없이 head에 넣으면 HTML 파싱 중단 위험 -->
+<script src="app.js"></script>
+
+<!-- defer로 파싱 완료 후 실행 보장 -->
+<script src="app.js" defer></script>
+```
+
+---
+
+## 2. 기본 문법
+
+### 호이스팅 (Hoisting)
+
+**정의**: JavaScript가 코드를 실행하기 전에
+**함수와 변수 선언을 해당 스코프의 맨 위로 끌어올리는 동작**입니다.
+
+**CS적 의의**:
+
+- **함수 선언식**: 호이스팅이 완전히 적용됩니다. 선언 전에 호출해도 작동합니다.
+- **`var`**: 선언은 호이스팅되지만 값은 호이스팅되지 않아 `undefined`가 됩니다.
+- **`let` / `const`**: 선언은 호이스팅되지만 초기화 전에 접근하면 오류가 납니다.
+  이 구간을 **TDZ(Temporal Dead Zone, 일시적 사각지대)**라고 합니다.
+
+```js
+// 함수 선언식 — 호이스팅 O
+greet(); // "안녕!" 정상 출력
+function greet() {
+  console.log("안녕!");
+}
+
+// const — 호이스팅되지만 TDZ로 접근 불가
+console.log(name); // ReferenceError
+const name = "희진";
+```
+
+> `var` 대신 `let`/`const`를 쓰는 이유 중 하나가 이 예측 불가능한 호이스팅 동작을 피하기 위해서입니다.
+
+---
+
+### 스코프 (Scope)
+
+**정의**: 변수가 **접근 가능한 유효 범위**입니다.
+
+**CS적 의의**:
+
+- **전역 스코프(Global Scope)**: 함수나 블록 밖에서 선언된 변수. 어디서든 접근 가능합니다.
+- **함수 스코프(Function Scope)**: 함수 안에서 선언된 변수. 함수 밖에서는 접근 불가합니다.
+  `var`는 함수 스코프를 따릅니다.
+- **블록 스코프(Block Scope)**: `{}` 블록 안에서 선언된 변수. 블록 밖에서는 접근 불가합니다.
+  `let`과 `const`는 블록 스코프를 따릅니다.
+
+```js
+let x = 10; // 전역 스코프
+
+function test() {
+  let y = 20; // 함수 스코프
+  console.log(x); // 10 — 전역 변수 접근 가능
+}
+
+console.log(y); // ReferenceError — 함수 밖에서 접근 불가
+```
+
+---
+
+### 타입 강제 변환 (Type Coercion)
+
+**정의**: JavaScript가 연산 또는 비교 시 **자동으로 자료형을 변환하는 동작**입니다.
+
+**CS적 의의**:
+
+- JavaScript는 동적 타입 언어(Dynamically Typed Language)입니다.
+  변수에 자료형을 명시하지 않아도 되고, 런타임에 자료형이 결정됩니다.
+- `==` 연산자는 타입 강제 변환을 일으킵니다. 이를 **암묵적 타입 변환**이라 합니다.
+  `===`은 타입 변환 없이 값과 자료형을 모두 비교합니다.
+
+```js
+console.log(1 == "1");   // true  — "1"을 숫자 1로 변환해서 비교
+console.log(1 === "1");  // false — 자료형(number vs string)이 다름
+console.log(0 == false); // true  — false를 0으로 변환
+console.log(0 === false);// false
+```
+
+> 타입 강제 변환은 예측하기 어려운 버그의 주요 원인입니다.
+> 항상 `===`을 사용하는 것이 안전합니다.
+
+---
+
+## 3. DOM 조작
+
+### DOM (Document Object Model)
+
+**정의**: 브라우저가 HTML 문서를 파싱한 결과를 메모리에 올린
+**트리 구조의 객체 모델**입니다. HTML의 각 태그가 하나의 노드(Node)가 됩니다.
+
+**CS적 의의**:
+
+- **트리 자료구조**: DOM은 부모-자식 관계로 구성된 트리입니다.
+  `<html>`이 루트 노드, `<head>`와 `<body>`가 자식 노드예요.
+- **JavaScript와 DOM의 관계**: JS 자체에는 DOM이 없습니다.
+  DOM은 브라우저가 제공하는 **Web API**입니다.
+  JS가 `document.querySelector()`로 요소를 찾는 것은 이 API를 통해
+  DOM 트리를 순회(traversal)하는 연산입니다.
+
+```
+document
+└── html
+    ├── head
+    │   └── title
+    └── body
+        ├── header
+        │   └── nav
+        └── main
+            └── section
+```
+
+---
+
+### 이벤트 루프 (Event Loop)
+
+**정의**: JavaScript가 **싱글 스레드임에도 비동기 작업을 처리할 수 있게 해주는 메커니즘**입니다.
+
+**CS적 의의**:
+
+JS 엔진은 싱글 스레드라 한 번에 하나만 처리합니다.
+그런데 어떻게 클릭 이벤트를 기다리면서 다른 코드를 실행할 수 있을까요?
+이벤트 루프가 그 역할을 합니다.
+
+```
+콜 스택 (Call Stack)       태스크 큐 (Task Queue)
+┌─────────────┐            ┌─────────────────────┐
+│  실행 중인   │   ←──────  │  setTimeout 콜백     │
+│  코드        │   이벤트   │  클릭 이벤트 핸들러  │
+└─────────────┘   루프     └─────────────────────┘
+```
+
+1. 콜 스택이 비어있는지 감시합니다.
+2. 비어 있으면 태스크 큐에서 대기 중인 콜백을 꺼내 콜 스택에 올립니다.
+3. 이 과정을 반복합니다.
+
+> `setTimeout(() => {}, 0)`이 즉시 실행되지 않는 이유가 이것입니다.
+> 콜백이 태스크 큐에 들어가고, 현재 콜 스택이 비어야 실행되기 때문입니다.
+
+---
+
+### textContent vs innerHTML
+
+**정의**: 둘 다 DOM 요소의 내용을 읽거나 변경하는 속성이지만, 보안과 동작 방식이 다릅니다.
+
+**CS적 의의**:
+
+| | textContent | innerHTML |
+|---|---|---|
+| HTML 태그 | 태그를 문자열로 취급 | 태그를 실제 HTML로 파싱 |
+| 보안 | 안전 | XSS 공격 위험 있음 |
+| 성능 | 빠름 | 상대적으로 느림 |
+
+- **XSS (Cross-Site Scripting)**: `innerHTML`로 사용자 입력을 그대로 넣으면
+  악의적인 `<script>` 태그가 실행될 수 있습니다.
+  사용자 입력을 다룰 때는 반드시 `textContent`를 사용하세요.
+
+```js
+const el = document.querySelector("p");
+
+// textContent — 태그를 그냥 문자로 표시
+el.textContent = "<strong>굵게</strong>"; // 화면: <strong>굵게</strong>
+
+// innerHTML — 태그를 실제 HTML로 해석
+el.innerHTML = "<strong>굵게</strong>";   // 화면: 굵게 (실제로 굵어짐)
+```
+
+---
+
+## 4. 비동기
+
+### 동기 vs 비동기 (Synchronous vs Asynchronous)
+
+**정의**: 작업의 **실행 순서와 대기 방식**에 관한 개념입니다.
+
+**CS적 의의**:
+
+- **동기(Synchronous)**: 작업이 순서대로 실행되고, 하나가 끝나야 다음이 시작됩니다.
+  콜 스택에서 위에서 아래로 처리되는 일반적인 코드 실행 방식입니다.
+- **비동기(Asynchronous)**: 시간이 걸리는 작업(네트워크 요청, 타이머 등)을
+  기다리지 않고 다음 코드를 먼저 실행합니다.
+  작업이 완료되면 콜백을 태스크 큐에 넣어 나중에 처리합니다.
+
+> JavaScript가 비동기를 지원하는 이유는 UI가 멈추지 않게 하기 위해서입니다.
+> 서버에서 데이터를 받아오는 동안 화면이 얼어버리면 사용자 경험이 나빠지니까요.
+
+---
+
+### 콜백 함수 (Callback Function)
+
+**정의**: 다른 함수에 **인자(argument)로 전달되어, 특정 시점에 실행되는 함수**입니다.
+
+**CS적 의의**:
+
+- **일급 함수(First-Class Function)**: JavaScript에서 함수는 값처럼 취급됩니다.
+  변수에 담을 수 있고, 다른 함수의 인자로 넘길 수 있고, 반환값이 될 수 있습니다.
+  콜백 함수가 가능한 이유가 바로 이 특성 때문입니다.
+- **콜백 지옥(Callback Hell)**: 비동기 작업이 중첩될수록 콜백이 중첩되어
+  코드가 오른쪽으로 깊어지는 현상입니다. 가독성과 유지보수가 극도로 나빠집니다.
+  Promise와 async/await가 이 문제를 해결하기 위해 등장했습니다.
+
+```js
+// 콜백 지옥 예시
+로그인(유저, (결과) => {
+  데이터가져오기(결과, (데이터) => {
+    저장하기(데이터, (저장결과) => {
+      알림보내기(저장결과, (알림) => {
+        // 점점 깊어지는 구조...
+      });
+    });
+  });
+});
+```
+
+---
+
+### Promise
+
+**정의**: 비동기 작업의 **미래 결과값을 나타내는 객체**입니다.
+성공(fulfilled), 실패(rejected), 대기(pending) 세 가지 상태를 가집니다.
+
+**CS적 의의**:
+
+- **상태 머신(State Machine)**: Promise는 세 가지 상태 중 하나에 있습니다.
+  `pending` → `fulfilled` 또는 `pending` → `rejected`로만 전이되고, 한 번 결정되면 바뀌지 않습니다.
+- **체이닝(Chaining)**: `.then()`은 새로운 Promise를 반환하기 때문에
+  `.then().then().then()` 형태로 비동기 작업을 순서대로 연결할 수 있습니다.
+  콜백 지옥보다 훨씬 읽기 쉬운 구조입니다.
+
+```js
+// Promise의 세 가지 상태
+const promise = new Promise((resolve, reject) => {
+  // pending 상태 (실행 중)
+  const 성공 = true;
+  if (성공) resolve("완료");  // fulfilled 상태로 전이
+  else reject("실패");        // rejected 상태로 전이
+});
+
+promise
+  .then((결과) => console.log(결과)) // fulfilled일 때 실행
+  .catch((에러) => console.log(에러)) // rejected일 때 실행
+  .finally(() => console.log("항상 실행")); // 결과에 상관없이 실행
+```
+
+---
+
+### async / await
+
+**정의**: Promise를 **동기 코드처럼 읽히게** 작성할 수 있는 문법적 설탕(Syntactic Sugar)입니다.
+
+**CS적 의의**:
+
+- **문법적 설탕(Syntactic Sugar)**: 기능은 동일하지만 더 읽기 쉽게 만든 문법입니다.
+  `async/await`는 Promise를 숨기고 동기 코드처럼 보이게 할 뿐,
+  내부적으로는 여전히 Promise로 동작합니다.
+- **`await`의 동작**: `await`를 만나면 해당 Promise가 settled(완료 또는 실패)될 때까지
+  함수 실행을 일시 중지합니다. 이때 콜 스택을 블로킹하지 않고 다른 코드가 실행될 수 있습니다.
+- **에러 처리**: `.catch()` 대신 `try/catch` 구문으로 에러를 처리합니다.
+  동기 코드의 에러 처리 방식과 동일해서 일관성이 생깁니다.
+
+```js
+// Promise 방식
+function 데이터가져오기() {
+  return fetch("/api/data")
+    .then((res) => res.json())
+    .then((data) => console.log(data))
+    .catch((err) => console.log(err));
+}
+
+// async/await 방식 — 같은 동작, 훨씬 읽기 쉬움
+async function 데이터가져오기() {
+  try {
+    const res = await fetch("/api/data"); // Promise가 완료될 때까지 대기
+    const data = await res.json();
+    console.log(data);
+  } catch (err) {
+    console.log(err);
+  }
+}
+```
+
+---
+
+## Vocabulary
+
+| 용어 | 원어 | 정의 |
+|---|---|---|
+| 런타임 | Runtime | 프로그램이 실제로 실행되는 환경 |
+| JS 엔진 | JavaScript Engine | 브라우저에 내장된 JS 실행 프로그램 |
+| V8 | V8 | Google이 만든 JS 엔진. Chrome, Node.js에서 사용 |
+| JIT 컴파일 | Just-In-Time Compilation | 자주 실행되는 코드를 런타임에 기계어로 컴파일해 속도를 높이는 기법 |
+| 콜 스택 | Call Stack | 함수 호출을 추적하는 LIFO 자료구조 |
+| 싱글 스레드 | Single Thread | 한 번에 하나의 작업만 처리하는 실행 방식 |
+| 이벤트 루프 | Event Loop | 콜 스택과 태스크 큐를 감시해 비동기 콜백을 처리하는 메커니즘 |
+| 태스크 큐 | Task Queue | 비동기 콜백이 대기하는 줄 |
+| 호이스팅 | Hoisting | JS가 선언을 스코프 맨 위로 끌어올리는 동작 |
+| TDZ | Temporal Dead Zone | let/const 선언 전 접근 불가 구간 |
+| 스코프 | Scope | 변수에 접근 가능한 유효 범위 |
+| 타입 강제 변환 | Type Coercion | == 연산 시 JS가 자동으로 자료형을 변환하는 동작 |
+| 동적 타입 | Dynamic Typing | 변수의 자료형이 런타임에 결정되는 방식 |
+| DOM | Document Object Model | 브라우저가 HTML을 파싱한 트리 구조의 객체 모델 |
+| Web API | Web API | 브라우저가 JS에 제공하는 기능 모음. DOM, fetch, setTimeout 등 |
+| XSS | Cross-Site Scripting | 악의적인 스크립트를 삽입하는 보안 공격 |
+| 일급 함수 | First-Class Function | 함수를 값처럼 다룰 수 있는 특성 |
+| 콜백 지옥 | Callback Hell | 중첩된 콜백으로 코드가 깊어지는 현상 |
+| Promise | Promise | 비동기 작업의 미래 결과값을 나타내는 객체 |
+| 상태 머신 | State Machine | 정해진 상태와 전이 규칙으로 동작하는 모델 |
+| 문법적 설탕 | Syntactic Sugar | 기능은 같지만 더 읽기 쉽게 만든 문법 |
+| async/await | async/await | Promise를 동기처럼 작성하게 해주는 문법 |
+| fetch | fetch | 서버에 HTTP 요청을 보내는 브라우저 내장 비동기 함수 |
+
+---
+
+## Key Questions
+
+**Q1.** JavaScript는 싱글 스레드인데 어떻게 클릭 이벤트를 기다리면서 다른 코드를 실행할 수 있나요?
+
+> **A.** 이벤트 루프 덕분입니다.
+> 클릭 이벤트 같은 비동기 작업은 브라우저의 Web API가 처리합니다.
+> 작업이 완료되면 콜백 함수를 태스크 큐에 넣습니다.
+> 이벤트 루프는 콜 스택이 비어있을 때 태스크 큐에서 콜백을 꺼내 실행합니다.
+> JS 코드 자체는 싱글 스레드이지만, 브라우저가 멀티스레드로 보조 작업을 처리해주는 구조입니다.
+
+---
+
+**Q2.** `==`과 `===`의 차이가 왜 중요한가요?
+
+> **A.** 타입 강제 변환 때문입니다.
+> `==`는 비교 전에 자동으로 자료형을 변환합니다.
+> `0 == false`가 `true`가 되고, `"" == false`도 `true`가 되는 등
+> 직관에 반하는 결과가 나옵니다.
+> `===`은 자료형 변환 없이 값과 자료형을 모두 비교하므로
+> 예측 가능한 동작을 보장합니다. 항상 `===`을 사용하세요.
+
+---
+
+**Q3.** Promise와 async/await 중 어떤 걸 써야 하나요?
+
+> **A.** 기능은 동일하므로 상황에 따라 선택합니다.
+> 대부분의 경우 `async/await`가 더 읽기 쉽고 에러 처리도 `try/catch`로 일관되게 할 수 있어 권장됩니다.
+> 다만 여러 비동기 작업을 동시에 실행할 때는 `Promise.all()`을 사용하는데,
+> 이때는 Promise 방식이 더 직관적입니다.
+>
+> ```js
+> // 두 요청을 동시에 보내고 둘 다 완료되면 처리
+> const [유저, 게시글] = await Promise.all([
+>   fetch("/api/user").then(r => r.json()),
+>   fetch("/api/posts").then(r => r.json()),
+> ]);
+> ```
