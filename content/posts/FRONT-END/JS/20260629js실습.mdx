@@ -1,0 +1,281 @@
+---
+title: "Java스크립트 직접 해보기"
+date: "2026-06-29"
+category: "Front-End"
+tags: ["JS","JavaScript" ,"실습", "연습"]
+description: "JavaScript기초 직접 작성해보기"
+thumbnail : "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782744795/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-29_235028_he6e6h.png"
+---
+
+## 참고 자료
+
+아래 자료를 참고하고 LLM모델을 활용하여 직접 작성해봤습니다.  
+
+[JS기초](/posts/20260629Javascript)  
+
+[JS 용어 정리](/posts/20260629jscs)  
+
+[JS 코드](https://github.com/Ko-kuma/WEB-PRACTICE/tree/main/my-profile)  
+
+---
+## 작성 하기 전
+
+HTML 코드와 CSS코드에 해당 태그를 추가해야지 적용
+
+```html
+<link rel="stylesheet" href="style.css">
+<!-- 위 CSS 링크 아래 설정 -->
+<!-- defer: HTML을 다 읽은 후에 JS를 실행 -->
+<script src="app.js" defer></script>
+```
+
+---
+
+```css
+/*반응형 위에 입력*/
+/* JS 기능용 스타일(JS는 JS 끼리)*/
+/* 스크롤 시 nav.scrolled 클래스 적용 */
+nav {
+
+  /* transition
+     CSS 속성이 변경될 때 자연스럽게 변경되도록 하는 속성
+
+     background-color → 배경색 변경
+     0.3s → 0.3초 동안 변경
+
+     box-shadow → 그림자 변경
+     0.3s → 0.3초 동안 변경
+  */
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+/* JS가 scrolled 클래스를 추가하면 적용 */
+nav.scrolled {
+
+  /* 배경색 변경 */
+  background-color: #1a1e24;
+
+  /* box-shadow
+     요소 바깥에 그림자를 만드는 속성
+
+     0 → 좌우 이동 없음
+     2px → 아래로 2px
+     12px → 그림자가 퍼지는 정도
+     rgba() → 투명도를 가진 색상
+  */
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* =======================
+   다크모드
+======================= */
+
+/* body 전체 */
+body {
+
+  /* 배경색과 글자색이 변경될 때
+     0.3초 동안 자연스럽게 변경 */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* JS가 dark 클래스를 추가하면 적용 */
+body.dark {
+
+  /* 페이지 전체 배경색 */
+  background-color: #1a1a2e;
+
+  /* 기본 글자색 */
+  color: #e0e0e0;
+}
+
+/* 다크모드일 때 nav */
+body.dark nav {
+
+  /* nav 배경색 */
+  background-color: #16213e;
+}
+
+/* 다크모드일 때 skills */
+body.dark #skills {
+
+  /* skills 배경색 */
+  background-color: #16213e;
+}
+
+/* 다크모드일 때 footer */
+body.dark footer {
+
+  /* footer 배경색 */
+  background-color: #16213e;
+}
+
+/* =======================
+   다크모드 버튼
+======================= */
+
+#dark-mode-btn {
+
+  /* 기본 배경 제거 */
+  background: none;
+
+  /* border
+     요소의 테두리
+
+     1px → 두께
+     solid → 실선
+     rgba() → 반투명 흰색
+  */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  /* 글자색 */
+  color: white;
+
+  /* 모서리를 둥글게 */
+  border-radius: 20px;
+
+  /* 안쪽 여백
+     위아래 4px
+     좌우 12px */
+  padding: 4px 12px;
+
+  /* 마우스를 올리면 손가락 모양 */
+  cursor: pointer;
+
+  /* 글자 크기 */
+  font-size: 16px;
+
+  /* 배경색이 변경될 때
+     0.2초 동안 자연스럽게 변경 */
+  transition: background-color 0.2s;
+}
+
+/* 버튼에 마우스를 올리면 */
+#dark-mode-btn:hover {
+
+  /* 배경색을 흰색 10% 투명도로 변경 */
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* =======================
+   연락처
+======================= */
+
+#contact h2 {
+
+  /* opacity
+     요소의 투명도
+
+     1 = 완전히 보임
+     0 = 완전히 안 보임
+
+     0.2초 동안 자연스럽게 변경
+  */
+  transition: opacity 0.2s;
+}
+
+#contact h2:hover {
+
+  /* 투명도를 70%로 변경 */
+  opacity: 0.7;
+}
+
+
+```
+
+## 기초 코드
+
+```JavaScript
+// 스크롤 시 nav 배경색 변화
+
+// nav 요소를 선택
+const nav = document.querySelector("nav");
+
+// 스크롤 이벤트가 발생할 때마다 아래 함수를 실행
+window.addEventListener("scroll", () => {
+  // scrollY: 현재 페이지를 얼마나 아래로 스크롤했는지 (px 단위)
+  if (window.scrollY > 50) {
+    // 50px 이상 스크롤하면 nav에 scrolled 클래스 추가
+    nav.classList.add("scrolled");
+  } else {
+    // 50px 미만이면 scrolled 클래스 제거 (원래 상태로)
+    nav.classList.remove("scrolled");
+  }
+});
+
+//  네비게이션 클릭 시 부드러운 스크롤
+
+// nav 안의 모든 a 태그를 선택 (여러 개이므로 querySelectorAll)
+const navLinks = document.querySelectorAll("nav a");
+
+// 각 링크마다 클릭 이벤트 등록
+navLinks.forEach((link) => {
+  link.addEventListener("click", (event) => {
+    // 기본 동작(페이지 점프)을 막음
+    event.preventDefault();
+
+    // href 속성값 가져오기 (예: "#about")
+    const targetId = link.getAttribute("href");
+
+    // href에 해당하는 섹션 요소 선택 (예: document.querySelector("#about"))
+    const targetSection = document.querySelector(targetId);
+
+    // 해당 섹션으로 부드럽게 스크롤
+    targetSection.scrollIntoView({ behavior: "smooth" });
+  });
+});
+
+//  연락처 클릭 시 번호 복사
+
+// contact 섹션의 h2 (전화번호가 있는 요소) 선택
+const contactNumber = document.querySelector("#contact h2");
+
+// 클릭 이벤트 등록
+contactNumber.addEventListener("click", () => {
+  // h2의 텍스트 내용 가져오기
+  const number = contactNumber.textContent;
+
+  // 클립보드에 복사 (navigator.clipboard는 브라우저 내장 API)
+  navigator.clipboard.writeText(number).then(() => {
+    // 복사 성공 시 — 원래 텍스트를 저장해두고 잠깐 안내 메시지 표시
+    const original = contactNumber.textContent;
+    contactNumber.textContent = "복사되었습니다!";
+
+    // 2초 후 원래 텍스트로 복원
+    setTimeout(() => {
+      contactNumber.textContent = original;
+    }, 2000);
+  });
+});
+
+// 마우스를 올렸을 때 커서 모양을 pointer(손가락)로 바꿔서 클릭 가능함을 표시
+contactNumber.style.cursor = "pointer";
+
+//  다크모드 토글
+
+// nav 안에 다크모드 버튼을 동적으로 생성
+const darkModeBtn = document.createElement("button");
+darkModeBtn.textContent = "🌙";       // 버튼 초기 텍스트
+darkModeBtn.id = "dark-mode-btn";     // CSS에서 스타일 적용을 위한 id
+
+// nav 안에 버튼 추가
+nav.appendChild(darkModeBtn);
+
+// 버튼 클릭 시 다크모드 토글
+darkModeBtn.addEventListener("click", () => {
+  // body에 dark 클래스가 있으면 제거, 없으면 추가
+  document.body.classList.toggle("dark");
+
+  // 다크모드 상태에 따라 버튼 아이콘 변경
+  if (document.body.classList.contains("dark")) {
+    darkModeBtn.textContent = "☀️"; // 다크모드 ON → 해 아이콘
+  } else {
+    darkModeBtn.textContent = "🌙"; // 다크모드 OFF → 달 아이콘
+  }
+});
+```
+
+<Callout>
+평일이기도하고 월요일이여서 열심히 했다고 생각은 못하지만 오늘도 기록 했고 무언가 결과물이 있었다는 것에 만족하며..
+기억하지 못해도 필요할 때 언제든 볼 수 있게 기록.
+그리고 6월30일 아침 출근 간 눈으로라도 훑어보기.
+</Callout>
