@@ -1,0 +1,517 @@
+---
+title: "HTML / CSS / JS 태그 & 속성 정리"
+date: "2026-07-01"
+category: "Front-End"
+tags: ["HTML", "CSS", "JavaScript", "태그정리", "레퍼런스"]
+description: "HTML 태그, CSS 속성, JS 메서드를 카테고리별 정리"
+thumbnail: "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+
+## 보는 방법
+
+- 표는 **실무 사용 빈도 높은 순**으로 정렬
+- 빈도: 상 = 거의 매일 씀 / 중 = 자주 씀 / 하 = 알아두면 좋음
+- 위치: 해당 태그/속성이 실제 코드에서 들어가는 곳
+
+---
+
+# 1. HTML 태그
+
+## 문서 구조 태그
+
+| 태그 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `<!DOCTYPE html>` | 상 | 파일 맨 첫 줄 | HTML5 문서임을 선언. 빠지면 브라우저가 옛날 방식으로 해석 |
+| `<html>` | 상 | DOCTYPE 바로 아래, 문서 전체를 감쌈 | 최상위 태그. `lang="ko"` 속성으로 언어 지정 |
+| `<head>` | 상 | `<html>` 안, `<body>` 위 | 화면에 보이지 않는 메타 정보 영역 |
+| `<meta charset>` | 상 | `<head>` 안 첫 번째 줄 | `<meta charset="UTF-8">` — 한글 깨짐 방지. 필수 |
+| `<meta viewport>` | 상 | `<head>` 안 | `<meta name="viewport" content="width=device-width, initial-scale=1.0">` — 모바일 반응형 필수 |
+| `<title>` | 상 | `<head>` 안 | 브라우저 탭에 표시되는 제목. SEO에도 영향 |
+| `<link>` | 상 | `<head>` 안 | 외부 파일 연결. `rel="stylesheet" href="style.css"` — CSS 연결 |
+| `<script>` | 상 | `<head>` 안 (defer 사용) 또는 `</body>` 바로 위 | JS 파일 연결. `src="app.js" defer` — defer 속성 권장 |
+| `<body>` | 상 | `<html>` 안, `<head>` 아래 | 화면에 실제로 보이는 콘텐츠 전부 |
+
+---
+
+## 시맨틱 레이아웃 태그
+
+의미 없는 `<div>` 대신 **의미 있는 태그**를 우선 사용. SEO + 접근성에 유리.
+
+| 태그 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `<header>` | 상 | `<body>` 안 최상단 | 페이지 또는 섹션의 상단 영역. 로고, 내비게이션 포함 |
+| `<nav>` | 상 | `<header>` 안 | 내비게이션 링크 모음. 메뉴, 페이지 이동 링크 |
+| `<main>` | 상 | `<body>` 안, `<header>` 아래 | 핵심 콘텐츠 영역. 한 페이지에 하나만 |
+| `<section>` | 상 | `<main>` 안 | 주제별 구획. `<h>` 태그와 함께 사용 |
+| `<footer>` | 상 | `<body>` 안 최하단 | 페이지 하단. 저작권, 연락처, 사이트맵 |
+| `<div>` | 상 | `<body>` 안 어디든 | 의미 없는 블록 컨테이너. 시맨틱 태그가 없을 때 레이아웃용 |
+| `<article>` | 중 | `<main>` 또는 `<section>` 안 | 독립적으로 배포 가능한 콘텐츠. 블로그 글, 뉴스 기사 |
+| `<aside>` | 중 | `<main>` 옆 또는 `<section>` 안 | 부가 콘텐츠. 사이드바, 광고, 관련 글 |
+
+---
+
+## 텍스트 태그
+
+| 태그 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `<h1>` ~ `<h6>` | 상 | `<section>`, `<article>`, `<main>` 안 | 제목 태그. h1이 가장 크고 h6이 가장 작음. h1은 페이지에 하나만, h2~h6는 계층 구조로 사용 |
+| `<p>` | 상 | `<section>`, `<article>`, `<div>` 안 | 문단(단락). 텍스트 본문에 사용 |
+| `<span>` | 상 | 텍스트 안 인라인 위치 어디든 | 인라인 컨테이너. 텍스트 일부에만 스타일 적용할 때 |
+| `<strong>` | 중 | `<p>`, `<h>`, `<li>` 등 텍스트 안 | 굵게 + 의미상 중요 강조. 스크린 리더가 강조로 읽음 |
+| `<em>` | 중 | `<p>`, `<h>`, `<li>` 등 텍스트 안 | 기울임 + 의미 강조. `<i>`는 시각적 기울임만, `<em>`은 의미 포함 |
+| `<br>` | 중 | 텍스트 안 줄바꿈이 필요한 곳 | 줄바꿈. 닫는 태그 없음. 남용 금지 — 여백은 CSS margin으로 |
+| `<hr>` | 하 | 섹션과 섹션 사이 | 수평 구분선. 주제 전환 시 사용 |
+
+---
+
+## 링크 / 이미지 태그
+
+| 태그 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `<a>` | 상 | `<nav>`, `<p>`, `<li>`, `<button>` 대신 | 링크. `href="#섹션id"` — 페이지 내 이동, `href="https://..."` — 외부 링크, `target="_blank"` — 새 탭 |
+| `<img>` | 상 | `<section>`, `<div>`, `<figure>` 안 | 이미지. `src="경로"` 필수, `alt="설명"` 접근성 필수. 닫는 태그 없음 |
+| `<figure>` | 중 | `<section>`, `<article>` 안 이미지/코드 블록 감쌀 때 | 이미지, 코드, 차트 등 독립 콘텐츠 래퍼. `<figcaption>`과 함께 씀 |
+| `<figcaption>` | 중 | `<figure>` 안 | `<figure>`의 설명 캡션 |
+| `<video>` | 중 | `<section>`, `<div>` 안 | 영상. `src="경로"` 또는 `<source>` 자식 태그 사용. `controls` 속성으로 재생 컨트롤 표시 |
+| `<audio>` | 하 | `<section>`, `<div>` 안 | 오디오. `controls` 속성으로 재생 컨트롤 표시 |
+
+---
+
+## 목록 태그
+
+| 태그 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `<ul>` | 상 | `<nav>`, `<section>`, `<div>` 안 | 순서 없는 목록. 기본으로 점(•)이 붙음. `nav ul`처럼 메뉴에 자주 사용 |
+| `<ol>` | 중 | `<section>`, `<article>` 안 | 순서 있는 목록. 기본으로 숫자(1, 2, 3...)가 붙음 |
+| `<li>` | 상 | `<ul>` 또는 `<ol>` 안에서만 | 목록 항목. `<ul>`이나 `<ol>` 밖에서는 사용 불가 |
+
+---
+
+## 폼 태그
+
+| 태그 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `<form>` | 상 | `<section>`, `<div>`, `<main>` 안 | 폼 양식 컨테이너. `action="경로"`, `method="POST"` |
+| `<input>` | 상 | `<form>` 안 또는 독립적으로 | 입력 필드. 닫는 태그 없음. type 속성으로 종류 변경 |
+| `<button>` | 상 | `<form>` 안, `<nav>`, `<div>` 안 어디든 | 버튼. `type="submit"` — 폼 제출, `type="button"` — JS 연동용 |
+| `<label>` | 중 | `<form>` 안, `<input>` 위 또는 옆 | 입력 필드 설명 라벨. `for="input의 id"`로 연결 |
+| `<textarea>` | 중 | `<form>` 안 | 여러 줄 텍스트 입력창 |
+| `<select>` | 중 | `<form>` 안 | 드롭다운 선택 목록 |
+| `<option>` | 중 | `<select>` 안에서만 | 드롭다운 각 선택지 |
+
+### input type 종류
+
+| type | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `type="text"` | 상 | `<form>` 안 `<input>` 속성 | 일반 텍스트 입력 |
+| `type="email"` | 상 | `<form>` 안 `<input>` 속성 | 이메일 형식 검사 자동 포함 |
+| `type="password"` | 상 | `<form>` 안 `<input>` 속성 | 입력값을 •••로 숨김 |
+| `type="submit"` | 상 | `<form>` 안 `<input>` 속성 | 폼 제출 버튼 |
+| `type="checkbox"` | 중 | `<form>` 안 `<input>` 속성 | 체크박스 |
+| `type="radio"` | 중 | `<form>` 안 `<input>` 속성 | 라디오 버튼 (하나만 선택) |
+| `type="number"` | 중 | `<form>` 안 `<input>` 속성 | 숫자 입력 |
+| `type="file"` | 중 | `<form>` 안 `<input>` 속성 | 파일 업로드 |
+| `type="hidden"` | 중 | `<form>` 안 `<input>` 속성 | 화면에 보이지 않는 입력값 |
+
+---
+
+## 테이블 태그
+
+| 태그 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `<table>` | 중 | `<section>`, `<div>` 안 | 표 전체를 감싸는 태그 |
+| `<thead>` | 중 | `<table>` 안 최상단 | 표 헤더 영역 묶음 |
+| `<tbody>` | 중 | `<table>` 안, `<thead>` 아래 | 표 본문 영역 묶음 |
+| `<tr>` | 중 | `<thead>` 또는 `<tbody>` 안 | 행(Table Row) |
+| `<th>` | 중 | `<tr>` 안, 헤더 행에 | 헤더 셀. 굵게 + 가운데 정렬이 기본 |
+| `<td>` | 중 | `<tr>` 안, 데이터 행에 | 데이터 셀 |
+
+---
+
+## 자주 쓰는 HTML 속성
+
+| 속성 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `id` | 상 | 모든 태그의 여는 태그 안 | 고유 식별자. 페이지에 하나만. CSS `#id`, JS `querySelector("#id")` |
+| `class` | 상 | 모든 태그의 여는 태그 안 | 스타일 클래스. 여러 개 가능. CSS `.class`, JS `querySelector(".class")` |
+| `href` | 상 | `<a>` 여는 태그 안 | 이동할 URL. `#섹션id`로 페이지 내 이동 |
+| `src` | 상 | `<img>`, `<script>` 여는 태그 안 | 파일 경로 |
+| `alt` | 상 | `<img>` 여는 태그 안 | 이미지 설명. 접근성 필수. 이미지 로드 실패 시 대체 텍스트 |
+| `type` | 상 | `<input>`, `<button>` 여는 태그 안 | 종류 지정 |
+| `placeholder` | 상 | `<input>`, `<textarea>` 여는 태그 안 | 입력 전 안내 텍스트 |
+| `for` | 중 | `<label>` 여는 태그 안 | 연결할 `<input>`의 id값. 라벨 클릭 시 해당 input 포커스 |
+| `disabled` | 중 | `<input>`, `<button>` 여는 태그 안 | 비활성화. 클릭/입력 불가 |
+| `rel` | 상 | `<link>` 여는 태그 안 | 파일 관계 명시. `rel="stylesheet"` |
+| `defer` | 상 | `<script>` 여는 태그 안 | HTML 파싱 완료 후 JS 실행 |
+| `target="_blank"` | 상 | `<a>` 여는 태그 안 | 새 탭에서 링크 열기 |
+| `colspan` | 중 | `<td>`, `<th>` 여는 태그 안 | 열 병합 |
+| `rowspan` | 중 | `<td>`, `<th>` 여는 태그 안 | 행 병합 |
+
+---
+
+# 2. CSS 속성
+
+## 텍스트 / 폰트
+
+| 속성 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `color` | 상 | 텍스트가 있는 모든 선택자 | 글자 색상. `#333`, `rgba(0,0,0,0.5)` |
+| `font-size` | 상 | `body`, `h`, `p`, `span` 등 | 글자 크기. 실무에선 `rem` 권장 |
+| `font-weight` | 상 | `h`, `strong`, `button`, `label` 등 | 글자 굵기. `bold` 또는 숫자 `400`(기본), `700`(굵게) |
+| `font-family` | 상 | `body` (전역 설정) | 글꼴. `body`에 한 번 설정하면 전체 적용 |
+| `line-height` | 상 | `body`, `p`, `li` 등 | 줄 간격. 숫자 배수로 지정. `1.6`이 가독성 좋은 기본값 |
+| `text-align` | 상 | `h`, `p`, `div`, `footer` 등 | 텍스트 정렬. `left`(기본) / `center` / `right` |
+| `text-decoration` | 상 | `a` 태그 선택자 | 텍스트 장식. `none` — 링크 기본 밑줄 제거 |
+| `letter-spacing` | 중 | `h`, 강조 텍스트, 버튼 | 글자 사이 간격 |
+| `text-transform` | 하 | 영문 텍스트 선택자 | 대소문자 변환. `uppercase` / `lowercase` |
+| `white-space` | 중 | 한 줄 고정이 필요한 요소 | `nowrap` — 줄바꿈 금지 |
+
+---
+
+## 색상 / 배경
+
+| 속성 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `background-color` | 상 | `nav`, `header`, `section`, `footer`, `button` 등 | 배경 색상 |
+| `opacity` | 상 | 호버 효과, 오버레이, 비활성 요소 | 투명도. `0`(완전 투명) ~ `1`(완전 불투명). 자식도 함께 투명해짐 |
+| `background-image` | 중 | 히어로 섹션, 배너 등 | 배경 이미지. `url("경로")` |
+| `background-size` | 중 | `background-image`가 있는 선택자 | `cover` — 영역 꽉 채움, `contain` — 비율 유지 |
+| `background-position` | 중 | `background-image`가 있는 선택자 | 배경 이미지 위치. `center center` |
+| `background-repeat` | 중 | `background-image`가 있는 선택자 | 반복 여부. `no-repeat` 자주 씀 |
+
+---
+
+## 박스 모델
+
+| 속성 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `box-sizing: border-box` | 상 | `*` 전역 리셋 — CSS 파일 맨 위 | width에 padding, border 포함. 실무 표준. 항상 전역 설정 |
+| `width` / `height` | 상 | 레이아웃 요소, 이미지, 버튼 등 | 너비 / 높이. `px`, `%`, `vw`, `vh` |
+| `max-width` | 상 | `section`, `.container` 등 콘텐츠 래퍼 | 최대 너비. `max-width: 800px; margin: 0 auto` — 가운데 정렬 조합 |
+| `margin` | 상 | 거의 모든 블록 요소 | 바깥 여백. `margin: 0 auto` — 가운데 정렬. `margin: 위 오른쪽 아래 왼쪽` |
+| `padding` | 상 | `section`, `button`, `nav`, `div` 등 | 안쪽 여백. margin과 같은 방식으로 지정 |
+| `border` | 상 | `input`, `button`, `card` 등 | 테두리. `border: 1px solid #ccc` — 두께 스타일 색상 순 |
+| `border-radius` | 상 | `button`, `input`, `img`, 카드 등 | 모서리 둥글게. `8px` 또는 `50%` — 원형 |
+| `box-shadow` | 상 | `nav.scrolled`, 카드, 팝업, 버튼 호버 | 그림자. `0 2px 8px rgba(0,0,0,0.2)` — x이동 y이동 흐림 색상 |
+| `overflow` | 상 | 콘텐츠가 넘칠 수 있는 컨테이너 | `hidden` — 잘라냄, `scroll` — 스크롤바, `auto` — 자동 |
+| `min-width` / `min-height` | 중 | 버튼, 아이콘, 모달 등 | 최소 너비/높이 |
+| `aspect-ratio` | 중 | 이미지, 영상, 썸네일 컨테이너 | 비율 고정. `aspect-ratio: 16 / 9` — 16:9 비율 유지 |
+| `word-break` | 중 | 긴 텍스트가 들어오는 카드, 말풍선 | 단어 줄바꿈 방식. `break-all` — 글자 단위 강제 줄바꿈 |
+| `pointer-events` | 중 | 클릭 막아야 하는 오버레이, 비활성 요소 | `none` — 마우스 이벤트 전부 무시 |
+| `user-select` | 중 | 버튼, 아이콘, 드래그 방지 요소 | `none` — 텍스트 드래그 선택 방지 |
+
+---
+
+## 레이아웃 (display / position)
+
+| 속성 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `display: block` | 상 | `<div>`, `<p>`, `<h>` 기본값이나 인라인 요소에 블록 적용 시 | 한 줄 전체 차지 |
+| `display: inline-block` | 상 | 나란히 배치하면서 width/height도 필요한 요소 | 인라인처럼 나란히 + 블록처럼 크기 적용 |
+| `display: flex` | 상 | `nav`, `header`, 카드 목록, 버튼 그룹 등 레이아웃 컨테이너 | Flexbox 활성화. 자식이 가로 정렬됨 |
+| `display: grid` | 상 | 전체 페이지 레이아웃, 갤러리, 카드 그리드 | Grid 활성화. 2차원 배치 |
+| `display: none` | 상 | JS로 숨기고 보여주는 요소, 모바일에서 숨길 요소 | 완전히 숨김. 공간도 사라짐 |
+| `visibility: hidden` | 중 | 공간은 유지하면서 숨겨야 할 요소 | 숨김. 공간은 유지됨 |
+| `position: static` | 상 | 기본값이므로 별도 지정 불필요 | 일반 흐름대로 배치 |
+| `position: relative` | 상 | absolute 자식의 기준점이 될 부모, 약간 이동이 필요한 요소 | 자기 원래 위치 기준 이동. 주변에 영향 없음 |
+| `position: absolute` | 상 | 툴팁, 드롭다운, 배지, 아이콘 오버레이 등 | `relative` 부모 기준 배치. 일반 흐름에서 이탈 |
+| `position: fixed` | 상 | `nav`, 플로팅 버튼, 채팅 위젯 | 화면 기준 고정. 스크롤해도 안 움직임 |
+| `position: sticky` | 상 | `nav`, 사이드바 목차 | 스크롤 시 특정 지점에서 고정. `top: 0`과 함께 |
+| `top` / `right` / `bottom` / `left` | 상 | `position`이 static이 아닌 요소 안 | position과 함께 위치 지정 |
+| `z-index` | 상 | 모달, 드롭다운, 툴팁, `nav` 등 겹치는 요소 | 쌓임 순서. 숫자 클수록 앞에. `position`이 있어야 작동 |
+
+---
+
+## Flexbox
+
+`display: flex`가 있는 **부모 요소** 안에서 사용.
+
+| 속성 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `flex-direction` | 상 | `display: flex`가 있는 부모 | 주축 방향. `row`(가로, 기본값) / `column`(세로) |
+| `justify-content` | 상 | `display: flex`가 있는 부모 | 주축 정렬. `flex-start` / `center` / `flex-end` / `space-between` / `space-around` |
+| `align-items` | 상 | `display: flex`가 있는 부모 | 교차축 정렬. `flex-start` / `center` / `flex-end` / `stretch` |
+| `gap` | 상 | `display: flex` 또는 `display: grid`가 있는 부모 | 자식 요소 사이 간격 |
+| `flex-wrap` | 상 | `display: flex`가 있는 부모 | 줄바꿈. `nowrap`(기본) / `wrap` — 넘치면 다음 줄로 |
+| `flex: 1` | 상 | flex 자식 요소 | 남은 공간을 균등하게 나눔 |
+| `align-self` | 중 | flex 자식 요소 개별 | 해당 자식만 교차축 정렬 재정의 |
+| `flex-shrink: 0` | 중 | flex 자식 요소 — 크기 고정이 필요할 때 | 자식이 줄어들지 않게 고정. 아이콘, 이미지에 자주 씀 |
+| `align-content` | 중 | `flex-wrap: wrap`일 때 부모 | 여러 줄이 생겼을 때 줄들 사이 정렬 |
+
+---
+
+## Grid
+
+`display: grid`가 있는 **부모 요소** 안에서 사용.
+
+| 속성 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `grid-template-columns` | 상 | `display: grid`가 있는 부모 | 열 구성. `repeat(3, 1fr)` — 3등분, `repeat(auto-fit, minmax(250px, 1fr))` — 반응형 자동 조절 |
+| `grid-template-rows` | 중 | `display: grid`가 있는 부모 | 행 높이 설정 |
+| `gap` | 상 | `display: grid`가 있는 부모 | 격자 사이 간격 |
+| `grid-column` | 중 | grid 자식 요소 | 몇 열을 차지할지. `grid-column: 1 / 3` — 1~3열 |
+| `grid-row` | 중 | grid 자식 요소 | 몇 행을 차지할지 |
+
+---
+
+## 시각 효과
+
+| 속성 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `transition` | 상 | hover, focus, active 효과가 있는 모든 요소 | CSS 변화 부드럽게. `transition: 속성 시간 easing`. `transition: all 0.3s ease` |
+| `transform` | 상 | 호버 효과, 애니메이션 요소 | 요소 변형. `translateY(-4px)` — 이동, `scale(1.05)` — 확대 |
+| `cursor` | 상 | `button`, `a`, 클릭 가능한 모든 요소 | 마우스 커서 모양. `pointer` — 손가락, `not-allowed` — 금지 |
+| `outline` | 상 | `input:focus`, `button:focus` | 포커스 외곽선. `outline: none` — 기본 파란 테두리 제거 시 |
+| `filter` | 중 | `img`, 오버레이, 블러 효과 | 이미지 필터. `blur(4px)`, `grayscale(100%)` |
+| `list-style` | 상 | `ul`, `ol`, `li` 선택자 | 목록 앞 점/숫자 제거. `list-style: none` — nav ul에 거의 항상 씀 |
+| `@keyframes` / `animation` | 중 | CSS 파일 어디든 (보통 컴포넌트 영역) | 복잡한 애니메이션. `@keyframes 이름 { from { } to { } }` → `animation: 이름 0.5s ease` |
+
+---
+
+## CSS 단위
+
+| 단위 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `px` | 상 | `border`, `border-radius`, 작은 고정 크기 | 고정 픽셀 |
+| `%` | 상 | `width`, `height`, `padding` (부모 비율 기준) | 부모 요소 기준 비율 |
+| `rem` | 상 | `font-size`, `padding`, `margin` | 루트 font-size 기준. 중첩 누적 없음. 실무 표준 |
+| `em` | 중 | 버튼의 padding 등 font-size 비례가 필요한 곳 | 현재 요소 font-size 기준. 중첩 시 누적됨 주의 |
+| `vw` / `vh` | 상 | 전체 화면 섹션, 히어로, 모달 | 화면 너비/높이 기준 |
+| `fr` | 상 | `grid-template-columns` 안 | Grid 전용. 사용 가능한 공간을 비율로 나눔 |
+
+---
+
+## CSS 선택자
+
+| 선택자 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `태그` | 상 | CSS 어디든 | `p { }` — 모든 p 태그 |
+| `.클래스` | 상 | CSS 어디든 | `.red { }` — class="red" 요소 |
+| `#아이디` | 상 | CSS 어디든 | `#title { }` — id="title" 요소 |
+| `부모 자식` | 상 | CSS 어디든 | `nav a { }` — nav 안의 모든 a |
+| `부모 > 직계자식` | 중 | CSS 어디든 | `ul > li { }` — ul 바로 아래 li만 |
+| `태그.클래스` | 상 | JS 동적 클래스 스타일, 다크모드 | `body.dark { }` — JS가 붙인 클래스 대상 |
+| `:hover` | 상 | `a`, `button`, 클릭 가능 요소 다음 | 마우스 올렸을 때 |
+| `:focus` | 상 | `input`, `textarea`, `button`, `a` 다음 | 포커스됐을 때 |
+| `:active` | 중 | `button`, `a` 다음 | 클릭하는 순간 |
+| `::before` / `::after` | 중 | 장식 요소, 아이콘 대용 | 요소 앞/뒤에 가상 콘텐츠 삽입 |
+| `*` | 상 | CSS 파일 맨 위 전역 리셋 | 모든 요소. `* { box-sizing: border-box; }` |
+
+---
+
+## CSS 변수
+
+```css
+/* :root — CSS 파일 전역 변수 선언부. 맨 위 리셋 바로 아래 */
+:root {
+  --primary: #3B82F6;
+  --dark: #2D333B;
+  --radius: 8px;
+}
+
+/* 사용 — 어떤 선택자 안에서든 var()로 참조 */
+button {
+  background-color: var(--primary);
+  border-radius: var(--radius);
+}
+
+/* 다크모드 — body.dark일 때 변수값만 바꿔치기 */
+body.dark {
+  --primary: #60A5FA;
+}
+```
+
+---
+
+## 반응형 미디어 쿼리
+
+```css
+/* CSS 파일 맨 마지막에 위치 — 항상 */
+
+@media (max-width: 768px) {
+  /* 768px 이하(모바일)일 때 덮어쓸 스타일 */
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* 태블릿 */
+}
+
+@media (min-width: 1025px) {
+  /* 데스크탑 */
+}
+```
+
+---
+
+# 3. JavaScript
+
+## DOM 선택
+
+| 메서드 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `document.querySelector("선택자")` | 상 | JS 파일 최상단 또는 이벤트 핸들러 안 | CSS 선택자로 요소 하나 선택. 없으면 null 반환 |
+| `document.querySelectorAll("선택자")` | 상 | JS 파일 최상단 또는 이벤트 핸들러 안 | 일치하는 모든 요소 선택. NodeList 반환. forEach로 순회 |
+| `document.createElement("태그")` | 상 | 동적으로 요소를 만들 때 | 새 요소 생성. 생성 후 appendChild로 DOM에 추가 |
+| `document.getElementById("id")` | 중 | JS 파일 어디든 | id로 요소 선택. querySelector보다 구형 방식 |
+
+---
+
+## DOM 조작
+
+| 메서드 / 속성 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `el.textContent` | 상 | 이벤트 핸들러 안, 동적 텍스트 변경 | 요소의 텍스트 읽기/변경. HTML 태그는 문자로 처리. 보안상 안전 |
+| `el.innerHTML` | 상 | 동적 HTML 삽입 | HTML 포함 내용 읽기/변경. 사용자 입력 직접 삽입 시 XSS 위험 |
+| `el.style.속성` | 상 | 이벤트 핸들러 안 | 인라인 스타일 직접 변경. `el.style.color = "blue"` |
+| `el.appendChild(자식)` | 상 | 동적 요소 생성 후 | 자식 요소 추가 (맨 뒤에) |
+| `el.setAttribute("속성", "값")` | 중 | 속성값을 동적으로 변경할 때 | 속성 설정. `el.setAttribute("src", "img.png")` |
+| `el.getAttribute("속성")` | 중 | 속성값을 읽을 때 | 속성값 읽기. `link.getAttribute("href")` |
+| `el.remove()` | 중 | 동적으로 요소를 삭제할 때 | 요소 자체를 DOM에서 제거 |
+| `el.parentElement` | 중 | 부모 요소 접근이 필요할 때 | 부모 요소 선택 |
+
+---
+
+## classList
+
+| 메서드 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `el.classList.add("클래스")` | 상 | 이벤트 핸들러 안 | 클래스 추가. CSS에 해당 클래스 스타일 미리 정의 필요 |
+| `el.classList.remove("클래스")` | 상 | 이벤트 핸들러 안 | 클래스 제거 |
+| `el.classList.toggle("클래스")` | 상 | 토글 버튼 이벤트 핸들러 안 | 있으면 제거, 없으면 추가. 다크모드, 메뉴 열기/닫기에 자주 씀 |
+| `el.classList.contains("클래스")` | 상 | 조건문 안 | 클래스 존재 여부 확인. `true` / `false` 반환 |
+
+---
+
+## 이벤트
+
+| 메서드 / 이벤트 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `el.addEventListener("이벤트", 콜백)` | 상 | JS 파일 어디든. DOM 선택 후 바로 아래 | 이벤트 리스너 등록 기본 패턴 |
+| `event.preventDefault()` | 상 | 이벤트 콜백 함수 맨 위 | 기본 동작 막기. a 태그 이동, form 자동 제출 막을 때 |
+| `event.stopPropagation()` | 중 | 이벤트 콜백 함수 안 | 이벤트 버블링 중단. 부모로 이벤트 전파 막기 |
+| `"click"` | 상 | `addEventListener` 첫 번째 인자 | 마우스 클릭 시 |
+| `"scroll"` | 상 | `window.addEventListener` 에서 사용 | 스크롤 시. `window.scrollY`로 위치 확인 |
+| `"keydown"` | 상 | `window` 또는 `input` 이벤트 | 키보드 누를 때. `event.key`로 어떤 키인지 확인 |
+| `"input"` | 상 | `<input>`, `<textarea>` 요소 이벤트 | 입력값 변경 시 실시간 감지 |
+| `"submit"` | 상 | `<form>` 요소 이벤트 | 폼 제출 시. `event.preventDefault()`와 세트 |
+| `"mouseover"` / `"mouseout"` | 중 | 호버 효과가 필요한 요소 이벤트 | 마우스 올릴 때 / 벗어날 때 |
+| `"DOMContentLoaded"` | 중 | `document.addEventListener` | HTML 파싱 완료 시. defer 사용하면 대신 사용 가능 |
+
+---
+
+## 조건문 / 반복문
+
+| | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `if () {} else if () {} else {}` | 상 | 함수 안, 이벤트 핸들러 안 어디든 | 조건 분기 기본 패턴 |
+| `삼항: 조건 ? 참 : 거짓` | 상 | 인라인 조건 분기, JSX 안 | 한 줄 조건식. `isOn ? "켜짐" : "꺼짐"` |
+| `for (let i = 0; i < n; i++)` | 상 | 횟수가 정해진 반복 | 인덱스 기반 반복 |
+| `for (const item of 배열)` | 상 | 배열/NodeList 순회 | 배열 요소 순회. `break` 사용 가능. forEach보다 유연 |
+| `for (const key in 객체)` | 중 | 객체 키 순회 | 객체의 키를 순서대로 순회 |
+| `while (조건)` | 중 | 조건 기반 반복 | 조건이 true인 동안 반복. 탈출 조건 필수 |
+
+---
+
+## 변수 / 자료형
+
+| | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `const` | 상 | JS 파일 어디든 — 기본으로 사용 | 변경 불가 상수 |
+| `let` | 상 | 값이 바뀌어야 할 때만 | 변경 가능 변수 |
+| `var` | ❌ | 사용 비권장 | 스코프 문제. const/let으로 대체 |
+| `` `템플릿 리터럴 ${변수}` `` | 상 | 문자열 안에 변수 삽입이 필요한 곳 | 백틱. 변수와 문자열 혼합 |
+| `null` | 상 | 초기값이 없음을 명시할 때 | 개발자가 직접 없음 표현 |
+| `undefined` | 중 | 조건 체크 시 | 값 미할당 시 JS가 자동으로 넣음 |
+| `[...배열]` (스프레드) | 상 | 배열/객체 복사, 합치기 | `[...arr1, ...arr2]` — 배열 합치기. `{...obj, key: 값}` — 객체 복사 후 수정 |
+| `const { 키 } = 객체` (구조분해) | 상 | 함수 매개변수, API 응답 처리 | 객체에서 원하는 키만 뽑기. `const { name, age } = user` |
+| `const [첫째, 둘째] = 배열` (구조분해) | 상 | 배열 값 꺼낼 때 | 배열 인덱스 대신 이름으로 접근 |
+| `typeof 값` | 중 | 자료형 확인이 필요한 조건문 | 자료형 문자열 반환. `typeof "hi"` → `"string"` |
+
+---
+
+## 연산자
+
+| 연산자 | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `===` | 상 | 조건문, 비교 어디든 | 엄격한 동등. 값 + 자료형 모두 비교. 항상 이것 사용 |
+| `!==` | 상 | 조건문 | 엄격한 부등 비교 |
+| `==` | ❌ | 사용 비권장 | 자료형 자동 변환으로 예측 어려움 |
+| `&&` / `||` / `!` | 상 | 조건문 안 | AND / OR / NOT |
+| `??` | 중 | 기본값이 필요한 곳 | null/undefined일 때 대체값. `a ?? "기본값"` |
+| `?.` | 중 | 중첩 객체 접근 시 | 존재하지 않는 속성 접근 시 에러 대신 undefined 반환 |
+| `삼항: 조건 ? 참 : 거짓` | 상 | 인라인 조건 분기 | 한 줄 조건식 |
+
+---
+
+## 함수 / 배열 메서드
+
+| | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `function 이름() {}` | 상 | JS 파일 최상단 또는 모듈 단위 | 함수 선언식. 호이스팅 O |
+| `const 이름 = () => {}` | 상 | 이벤트 콜백, 배열 메서드 안 | 화살표 함수. 현대 코드에서 주로 사용 |
+| `arr.forEach((item) => {})` | 상 | NodeList, 배열 순회 | 배열 각 요소 순회. 반환값 없음 |
+| `arr.map((item) => 변환값)` | 상 | 배열을 다른 형태로 변환할 때 | 각 요소를 변환해서 새 배열 반환 |
+| `arr.filter((item) => 조건)` | 상 | 배열에서 특정 조건만 걸러낼 때 | 조건에 맞는 요소만 새 배열로 반환 |
+| `arr.find((item) => 조건)` | 중 | 특정 요소 하나를 찾을 때 | 조건에 맞는 첫 번째 요소 하나 반환 |
+| `arr.includes(값)` | 상 | 포함 여부 확인이 필요한 조건문 | 값 포함 여부. `true` / `false` |
+| `arr.reduce((acc, cur) => acc + cur, 초기값)` | 중 | 배열을 하나의 값으로 합산할 때 | 배열 전체를 순회하며 누적값 반환. 합계, 평균 등 |
+| `arr.some((item) => 조건)` | 중 | 하나라도 조건에 맞는지 확인 | 하나라도 true면 true 반환 |
+| `arr.every((item) => 조건)` | 중 | 전부 조건에 맞는지 확인 | 전부 true여야 true 반환 |
+| `arr.length` | 상 | 배열 길이 확인 | 배열 요소 수 반환 |
+| `Object.keys(객체)` | 중 | 객체 키 목록이 필요할 때 | 객체의 키만 배열로 반환. `["name", "age"]` |
+| `Object.values(객체)` | 중 | 객체 값 목록이 필요할 때 | 객체의 값만 배열로 반환 |
+| `Object.entries(객체)` | 중 | 키-값 쌍을 순회할 때 | `[["name", "희진"], ["age", 28]]` 형태로 반환 |
+| `str.split("구분자")` | 상 | 문자열을 배열로 나눌 때 | `"a,b,c".split(",")` → `["a","b","c"]` |
+| `str.trim()` | 상 | 입력값 공백 제거 | 앞뒤 공백 제거. form 입력값 처리에 자주 씀 |
+| `str.includes("검색어")` | 상 | 문자열 포함 여부 확인 | 검색, 필터링에 자주 씀 |
+| `str.replace("찾기", "바꾸기")` | 중 | 문자열 치환 | 첫 번째 일치만 변환. 전체 변환은 정규식 사용 |
+| `str.toLowerCase()` / `str.toUpperCase()` | 중 | 대소문자 통일이 필요한 비교, 검색 | 대소문자 변환 |
+
+---
+
+## 객체 (Object)
+
+| | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `const obj = { key: value }` | 상 | JS 파일 어디든 | 객체 리터럴 선언. 키-값 쌍으로 데이터 구조화 |
+| `obj.key` | 상 | 객체 값을 읽거나 쓸 때 | 점 표기법. `user.name` |
+| `obj["key"]` | 상 | 키가 변수이거나 동적일 때 | 괄호 표기법. `obj[변수]` |
+| `obj.key = 값` | 상 | 객체 속성 수정/추가 | 존재하면 수정, 없으면 추가 |
+| `delete obj.key` | 중 | 객체 속성 제거 | 해당 키-값 쌍 삭제 |
+| `"key" in obj` | 중 | 객체에 키가 있는지 확인 | `true` / `false` 반환 |
+
+---
+
+## 비동기
+
+| | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `setTimeout(콜백, ms)` | 상 | 지연 실행이 필요한 곳 | 일정 시간 후 한 번 실행 |
+| `setInterval(콜백, ms)` | 중 | 반복 실행이 필요한 곳 | 일정 시간마다 반복 실행 |
+| `clearInterval(타이머)` | 중 | setInterval을 중단할 조건 발생 시 | 반복 중단 |
+| `async function` | 상 | 서버 요청, 비동기 작업을 하는 함수 선언부 | 함수 안에서 await 사용 가능 |
+| `await` | 상 | async 함수 안, Promise 앞 | Promise 완료될 때까지 대기. async 함수 안에서만 |
+| `try { } catch(err) { }` | 상 | async 함수 안 | 오류 처리. async/await와 세트 |
+| `fetch("url")` | 상 | async 함수 안 | 서버에 HTTP 요청. Promise 반환 |
+| `.then()` / `.catch()` | 상 | Promise 뒤 | 성공 / 실패 처리 |
+| `window.scrollY` | 상 | scroll 이벤트 핸들러 안 | 현재 스크롤 위치(px) |
+| `el.scrollIntoView({ behavior: "smooth" })` | 상 | 클릭 이벤트 핸들러 안 | 해당 요소로 부드럽게 스크롤 이동 |
+| `navigator.clipboard.writeText(값)` | 중 | 복사 버튼 클릭 이벤트 안 | 클립보드에 텍스트 복사. Promise 반환 |
+
+---
+
+## 브라우저 내장 API
+
+| | 빈도 | 위치 | 설명 |
+|---|---|---|---|
+| `console.log()` | 상 | JS 파일 어디든 — 디버깅 | 콘솔에 출력 |
+| `console.error()` | 중 | catch 블록 안 | 빨간 에러 메시지 출력 |
+| `console.warn()` | 중 | 경고 상황 디버깅 | 노란 경고 메시지 출력 |
+| `JSON.stringify(객체)` | 상 | 객체를 문자열로 저장/전송할 때 | 객체 → JSON 문자열 변환 |
+| `JSON.parse("문자열")` | 상 | 서버 응답이나 저장된 문자열을 객체로 변환할 때 | JSON 문자열 → 객체 변환 |
+| `window.location.href` | 중 | 페이지 이동이 필요한 이벤트 핸들러 안 | 현재 URL 읽기. 값 변경 시 페이지 이동 |
+| `window.innerWidth` / `window.innerHeight` | 중 | 화면 크기 기반 조건 처리 | 현재 브라우저 창의 너비/높이(px) |
+| `Math.floor()` / `Math.ceil()` / `Math.round()` | 중 | 숫자 계산이 필요한 곳 | 내림 / 올림 / 반올림 |
+| `Math.random()` | 중 | 랜덤 값이 필요한 곳 | 0 이상 1 미만의 난수 반환 |
+| `parseInt()` / `parseFloat()` | 상 | 문자열 → 숫자 변환이 필요한 곳 | 문자열을 정수/실수로 변환. `parseInt("42px")` → `42` |
+| `isNaN(값)` | 중 | 숫자 유효성 검사 | 값이 NaN(숫자가 아님)인지 확인. `true` / `false` |
