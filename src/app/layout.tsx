@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { PixelCursor } from "@/components/pixel-cursor";
@@ -79,6 +80,7 @@ export default function RootLayout({
             <Footer />
           </div>
           {process.env.VERCEL ? <script defer src="/_vercel/insights/script.js" /> : null}
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
