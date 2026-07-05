@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
@@ -28,7 +29,7 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   authors: [{ name: siteConfig.author }],
   creator: siteConfig.author,
-   verification: {
+  verification: {
     google: "jx6GDIlqZdC4IY3T_EIxxBRs_YB9wcUXejvBm9As6yc",
   },
   openGraph: {
@@ -72,6 +73,23 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-GCR419Q6XT"
+          strategy="afterInteractive"
+        />
+
+        <Script id="google-tag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-GCR419Q6XT');
+          `}
+        </Script>
+
         <ThemeProvider>
           <PixelCursor />
           <div className="flex min-h-screen flex-col">
