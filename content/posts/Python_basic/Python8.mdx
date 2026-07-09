@@ -1,0 +1,302 @@
+---
+title: "Python 기초 - 예외처리 (try, except)"
+date: "2026-07-09"
+category: "Back-End"
+tags: ["Python", "기초", "예외처리", "try", "except"]
+description: "try/except 기본 구조, 여러 예외 타입 처리, else/finally, raise, 커스텀 예외"
+thumbnail: "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+## 참고 자료
+
+자료에서 사용하는 CS 용어 정리입니다.
+
+[Python 기초 - 예외처리 (try, except)](/posts/20260709-python-exception-handling)
+
+[연습](https://github.com/Ko-kuma/Python_Portfolio/blob/main/Python_study/Python_try_except.py)
+
+---
+## 예외처리란?
+
+프로그램 실행 중 에러가 나더라도, 그 자리에서 프로그램이 통째로 멈추지 않고 대응할 수 있게 해주는 문법이다.
+
+지금까지 배운 `ValueError`, `KeyError`, `IndexError`, `TypeError` 같은 에러들은 발생하는 순간 프로그램이 그대로 멈춰버렸다. 예외처리는 "에러가 나면 이렇게 대신 처리해라"라고 미리 대비책을 마련해두는 것이다.
+
+실생활 비유: 계단에 미끄럼 방지 매트를 깔아두는 것과 같다. 미끄러지는 사고(에러) 자체를 완전히 없앨 수는 없지만, 미끄러졌을 때 크게 다치지 않도록(프로그램이 죽지 않도록) 미리 대비해두는 것이다.
+
+## try / except 기본 구조
+
+에러가 날 수도 있는 코드를 `try` 블록에 넣고, 에러가 났을 때 실행할 코드를 `except` 블록에 적는다.
+
+```python
+try:
+    age = int("스물다섯")   # 문자열을 숫자로 못 바꿔서 에러 발생
+    print(age)
+except:
+    print("숫자로 변환할 수 없습니다")   # 에러가 나면 여기가 실행됨
+
+print("프로그램은 계속 진행됩니다")   # try/except 덕분에 여기까지 도달함
+```
+
+`try` 블록 안에서 에러가 발생하는 즉시, 그 아래 남은 코드는 건너뛰고 바로 `except` 블록으로 넘어간다. 에러가 안 났다면 `except`는 아예 실행되지 않는다.
+
+## 특정 예외 타입만 잡기
+
+`except:`만 쓰면 어떤 종류의 에러든 다 잡아버리는데, 이건 실무에서 지양해야 할 습관이다. 어떤 에러가 날지 예상해서, 그 종류를 정확히 지정하는 게 좋다.
+
+```python
+try:
+    age = int("스물다섯")
+except ValueError:              # 숫자로 못 바꿀 때 나는 에러만 잡음
+    print("숫자 형식이 아닙니다")
+```
+
+지금까지 배운 에러들도 전부 이렇게 지정해서 잡을 수 있다.
+
+```python
+data = {"name": "혜진"}
+
+try:
+    print(data["age"])
+except KeyError:                # 딕셔너리에 없는 key로 접근할 때 나는 에러
+    print("해당 key가 없습니다")
+
+numbers = [1, 2, 3]
+try:
+    print(numbers[10])
+except IndexError:              # 리스트 범위를 벗어난 인덱스로 접근할 때 나는 에러
+    print("인덱스 범위를 벗어났습니다")
+
+try:
+    result = 10 / 0
+except ZeroDivisionError:       # 0으로 나눌 때 나는 에러
+    print("0으로 나눌 수 없습니다")
+```
+
+> 함정: `except:`처럼 종류를 지정하지 않고 모든 에러를 뭉뚱그려 잡으면, 정작 내가 예상하지 못한 진짜 버그(오타, 로직 실수 등)까지 조용히 삼켜버려서 문제를 찾기 어려워진다. 항상 "이 코드에서 어떤 에러가 날 수 있는가"를 먼저 생각하고, 그 종류를 정확히 지정하는 습관이 중요하다.
+
+## 예외도 계층 구조를 가진다
+
+`ValueError`, `KeyError`, `IndexError` 같은 에러들은 사실 전부 `Exception`이라는 하나의 큰 틀에서 갈라져 나온 하위 종류다.
+
+```
+BaseException
+ └── Exception
+      ├── ValueError
+      ├── TypeError
+      ├── KeyError
+      ├── IndexError
+      ├── ZeroDivisionError
+      └── ...
+```
+
+그래서 `except Exception:`이라고 쓰면, 그 아래 있는 모든 종류의 에러를 다 잡을 수 있다. `except:`(아무것도 안 쓰는 것)와 `except Exception:`은 거의 같아 보이지만 미묘한 차이가 있다 — `except:`는 `Exception`보다 더 상위인 `BaseException`까지 잡아버려서, 프로그램을 강제 종료시키는 `Ctrl+C`(`KeyboardInterrupt`)나 `exit()` 호출까지 막아버릴 수 있다. 그래서 정말 예외 없이 전부 잡아야 한다면 `except:`보다 `except Exception:`이 더 안전하다.
+
+실생활 비유: 이건 마치 동물 분류 체계와 같다. "포유류"(Exception)라는 큰 범주 안에 "개", "고양이", "말"(ValueError, KeyError, IndexError 등) 같은 세부 종류가 속해있는 것이다. "포유류를 전부 받아주세요"라고 하면 개도 고양이도 다 해당되는 것처럼, `except Exception:`도 그 하위의 모든 에러를 다 받아준다.
+
+### except 순서가 중요한 이유
+
+여러 개의 `except`를 쓸 때는, **더 구체적인(하위) 에러를 먼저, 더 포괄적인(상위) 에러를 나중에** 써야 한다.
+
+```python
+# 잘못된 순서
+try:
+    value = int("abc")
+except Exception:          # 상위 범주를 먼저 써버림
+    print("일반 에러")
+except ValueError:          # 절대 여기까지 도달 못 함! 위에서 이미 다 잡혔음
+    print("값 에러")
+
+# 올바른 순서
+try:
+    value = int("abc")
+except ValueError:          # 구체적인 것부터 먼저 확인
+    print("값 에러")
+except Exception:            # 나머지는 여기서 처리
+    print("일반 에러")
+```
+
+> 함정: Python은 위에서부터 순서대로 `except`를 확인하다가, 조건에 맞는 첫 번째 블록만 실행하고 나머지는 건너뛴다. 포괄적인 에러 종류(`Exception`)를 먼저 써두면, 그 아래에 아무리 구체적인 `except ValueError:`를 써도 절대 실행되지 않는다. 이건 문법 오류가 아니라서 조용히 잘못된 채로 넘어가기 쉬우니 특히 주의해야 한다.
+
+## 여러 예외를 한 번에 처리하기
+
+같은 대응을 해도 되는 에러가 여러 종류라면, 튜플로 묶어서 한 번에 잡을 수 있다.
+
+```python
+try:
+    value = int(input("숫자를 입력하세요: "))
+    result = 10 / value
+except (ValueError, ZeroDivisionError):   # 두 종류의 에러를 한 번에 처리
+    print("올바른 값을 입력해주세요")
+```
+
+각각 다르게 대응하고 싶다면 `except`를 여러 개 이어 쓰면 된다.
+
+```python
+try:
+    value = int(input("숫자를 입력하세요: "))
+    result = 10 / value
+except ValueError:
+    print("숫자 형식이 아닙니다")
+except ZeroDivisionError:
+    print("0으로 나눌 수 없습니다")
+```
+
+## 에러 메시지 직접 확인하기: as
+
+`except ErrorType as e`처럼 쓰면, 발생한 에러 객체 자체를 변수(`e`)에 담아서 자세한 내용을 확인할 수 있다.
+
+```python
+try:
+    age = int("스물다섯")
+except ValueError as e:
+    print(f"에러 발생: {e}")   # 에러 발생: invalid literal for int() with base 10: '스물다섯'
+```
+
+실생활 비유: 병원에서 "어디가 아프세요?"라고만 묻는 게 아니라, "정확히 어느 부위가, 어떻게 아프세요?"라고 세부 증상을 물어보는 것과 같다. `e`에는 에러의 구체적인 원인이 담겨 있어서, 로그를 남기거나 디버깅할 때 큰 도움이 된다.
+
+**실무에서는 이렇게 쓴다**: 에러가 발생했을 때 사용자에게는 "일시적인 오류가 발생했습니다" 같은 간단한 메시지만 보여주고, 개발자를 위한 로그에는 `e`로 받은 상세한 에러 내용을 기록해두는 방식이 흔하다.
+
+## else — try가 성공했을 때만 실행
+
+`else` 블록은 `try`가 에러 없이 성공적으로 끝났을 때만 실행된다.
+
+```python
+try:
+    age = int("25")
+except ValueError:
+    print("숫자 형식이 아닙니다")
+else:
+    print(f"변환 성공: {age}살")   # 에러가 안 났을 때만 실행
+```
+
+> 이건 반복문에서 배운 `for-else`와 이름은 같지만 동작 원리는 다르다. `for-else`는 "break 없이 끝까지 돌았을 때" 실행되고, `try-else`는 "예외가 하나도 안 났을 때" 실행된다.
+
+## finally — 성공하든 실패하든 항상 실행
+
+`finally` 블록은 에러가 나든 안 나든, 심지어 `except` 안에서 또 다른 문제가 생기든 **무조건 마지막에 실행**된다.
+
+```python
+try:
+    file_content = "파일 내용을 읽는 중..."
+    print(file_content)
+except Exception as e:
+    print(f"에러: {e}")
+finally:
+    print("작업 종료")   # 성공하든 실패하든 항상 출력됨
+```
+
+실생활 비유: 요리를 하다가 불이 나든 안 나든, 요리가 끝나면 반드시 가스불을 잠그는 것과 같다. "성공했으니까 안 잠가도 되겠지"는 없다.
+
+**실무에서는 이렇게 쓴다**: 파일이나 데이터베이스 연결처럼 "작업이 끝나면 반드시 닫아야 하는" 자원을 정리할 때 `finally`를 쓴다. (다음 단계에서 배울 `with`문이 이 패턴을 더 편하게 만들어주는 문법이다.)
+
+## raise — 예외를 직접 발생시키기
+
+에러가 저절로 나기를 기다리지 않고, 특정 조건을 만족하면 개발자가 직접 에러를 일으킬 수도 있다.
+
+```python
+def set_age(age):
+    if age < 0:
+        raise ValueError("나이는 음수가 될 수 없습니다")   # 직접 에러를 발생시킴
+    return age
+
+set_age(-5)   # ValueError: 나이는 음수가 될 수 없습니다
+```
+
+실생활 비유: 놀이기구 안전요원이 "키가 안 되는데요"라고 스스로 판단해서 입장을 막는 것과 같다. 시스템이 저절로 문제를 발견할 때까지 기다리지 않고, 문제 상황을 먼저 알아채고 직접 제지하는 것이다.
+
+**실무에서는 이렇게 쓴다**: 함수에 잘못된 값이 들어왔을 때, 그 값을 그대로 쓰다가 나중에 엉뚱한 곳에서 에러가 나게 두지 않고, 문제가 되는 지점에서 바로 명확한 에러를 발생시켜서 원인을 빨리 찾을 수 있게 한다.
+
+## 커스텀 예외 만들기
+
+내장된 에러 종류만으로 부족하다면, `Exception`을 상속받아 직접 에러 종류를 만들 수도 있다. (상속은 나중에 클래스 심화에서 자세히 다룰 개념이지만, 지금은 "이렇게 쓴다" 정도만 봐도 충분하다.)
+
+```python
+class InsufficientBalanceError(Exception):   # 나만의 에러 종류 정의
+    pass
+
+def withdraw(balance, amount):
+    if amount > balance:
+        raise InsufficientBalanceError("잔액이 부족합니다")
+    return balance - amount
+
+try:
+    withdraw(1000, 5000)
+except InsufficientBalanceError as e:
+    print(e)   # 잔액이 부족합니다
+```
+
+**실무에서는 이렇게 쓴다**: "잔액 부족", "권한 없음"처럼 그 서비스만의 특별한 에러 상황을 표현할 때, 내장 에러(`ValueError` 등)보다 의미가 명확한 커스텀 에러를 만들어 쓴다. FastAPI에서도 이런 커스텀 예외를 만들어 API 에러 응답과 연결하는 패턴을 자주 쓴다.
+
+## assert — 조건이 참인지 스스로 검증하기
+
+`assert`는 "이 조건은 반드시 참이어야 한다"고 코드 스스로 확인하는 문법이다. 조건이 거짓이면 `AssertionError`가 발생한다.
+
+```python
+def calculate_average(numbers):
+    assert len(numbers) > 0, "빈 리스트의 평균은 구할 수 없습니다"   # 조건, 실패 시 메시지
+    return sum(numbers) / len(numbers)
+
+calculate_average([])   # AssertionError: 빈 리스트의 평균은 구할 수 없습니다
+```
+
+실생활 비유: 요리를 시작하기 전에 "재료가 다 준비됐는지" 스스로 확인하는 것과 같다. `raise`가 "손님에게 안내하는 정식 에러 상황"이라면, `assert`는 "개발자가 스스로에게 거는 안전장치"에 더 가깝다.
+
+> 함정: `assert`는 Python을 최적화 모드(`python -O`)로 실행하면 통째로 무시되도록 설계되어 있다. 그래서 사용자 입력값 검증처럼 반드시 실행되어야 하는 중요한 검사에는 `assert` 대신 `raise`나 `if`문을 쓰고, `assert`는 주로 "개발 중에 내 가정이 맞는지 확인하는 용도"나 테스트 코드에 쓴다.
+
+## 트레이스백(Traceback) 읽는 법
+
+예외처리 없이 에러가 발생하면, Python은 "트레이스백"이라는 에러 발생 경로를 화면에 보여준다. 처음엔 빨간 글씨 뭉치처럼 보여도, 사실 순서대로 읽으면 되는 정보다.
+
+```python
+def divide(a, b):
+    return a / b
+
+def calculate():
+    return divide(10, 0)
+
+calculate()
+```
+
+```
+Traceback (most recent call last):
+  File "app.py", line 7, in <module>
+    calculate()
+  File "app.py", line 5, in calculate
+    return divide(10, 0)
+  File "app.py", line 2, in divide
+    return a / b
+ZeroDivisionError: division by zero
+```
+
+**읽는 순서**: 맨 아래 줄이 "무슨 에러가 났는지"(가장 중요한 결론)이고, 위로 올라갈수록 "그 에러가 어떤 호출 경로를 거쳐서 발생했는지"를 거꾸로 보여준다. 이 예시는 `calculate()` → `divide(10, 0)` → `a / b`까지 순서대로 호출되다가, 마지막 `a / b`에서 `ZeroDivisionError`가 났다는 뜻이다.
+
+실생활 비유: 사고 경위서를 시간 역순으로 정리해둔 것과 같다. "최종적으로 무슨 사고가 났는지"를 맨 아래에서 먼저 확인하고, 위로 올라가면서 "누구를 거쳐서 여기까지 왔는지" 그 경로를 추적할 수 있다.
+
+**실무에서는 이렇게 쓴다**: 에러가 나면 당황해서 전체를 다 읽으려 하지 말고, 먼저 맨 아래 줄(에러 종류와 메시지)을 확인하고, 필요하면 위로 올라가면서 "내가 작성한 파일"이 언급된 줄을 찾아 문제 지점을 좁혀나간다.
+
+JS와 비교하면:
+
+| Python | JavaScript |
+|---|---|
+| `try / except / else / finally` | `try / catch / finally` (else 없음) |
+| `except ValueError as e:` | `catch (e) { }` (JS는 에러 종류 구분 없이 일단 다 잡고, `if (e instanceof ...)` 로 직접 구분) |
+| `raise ValueError("메시지")` | `throw new Error("메시지")` |
+| `class MyError(Exception):` | `class MyError extends Error { }` |
+
+가장 큰 차이는 Python은 `except`에 에러 종류를 지정해서 처음부터 골라 잡을 수 있지만, JS는 `catch` 하나로 일단 다 잡은 다음 내부에서 `instanceof`로 종류를 구분해야 한다는 점이다. 또한 Python에는 "성공했을 때만" 실행되는 `else` 절이 있지만 JS의 try/catch에는 이에 대응하는 문법이 없다.
+
+## 요약
+
+- 예외처리는 에러가 나도 프로그램이 멈추지 않고 대응할 수 있게 해준다. `try` 블록의 코드에서 에러가 나면 즉시 `except`로 넘어간다
+- `except:`로 모든 에러를 뭉뚱그려 잡지 말고, `except ValueError:`처럼 예상되는 에러 종류를 정확히 지정하는 게 안전하다
+- 함정: 종류를 지정하지 않은 `except:`는 예상 못 한 진짜 버그까지 조용히 숨겨버릴 수 있다
+- 모든 예외는 `Exception`이라는 상위 범주 아래 속한 계층 구조를 가지며, `except Exception:`으로 하위의 모든 에러를 한 번에 잡을 수 있다
+- 함정: 여러 `except`를 쓸 때 포괄적인 것(`Exception`)을 먼저 쓰면, 그 아래 구체적인 `except`는 절대 실행되지 않는다. 구체적인 것부터 순서대로 써야 한다
+- 여러 에러를 한 번에 처리하려면 튜플로 묶고(`except (ValueError, TypeError):`), 각각 다르게 처리하려면 `except`를 여러 개 쓴다
+- `except ErrorType as e:`로 에러의 구체적인 내용을 변수에 담아 확인할 수 있다
+- `else`는 try가 에러 없이 성공했을 때만, `finally`는 성공/실패와 무관하게 항상 실행된다
+- `raise`로 특정 조건일 때 개발자가 직접 에러를 발생시킬 수 있다
+- `Exception`을 상속받아 그 서비스만의 의미를 가진 커스텀 예외를 만들 수 있다
+- `assert 조건, 메시지`로 "이 조건은 반드시 참이어야 한다"는 가정을 검증할 수 있다. 다만 최적화 모드에서 무시될 수 있어 중요한 검증에는 `raise`를 쓴다
+- 트레이스백은 에러 정보를 아래에서 위로(결론 → 호출 경로 순으로) 읽는 것이 핵심이다
+- JS와 비교하면 Python은 `except`로 에러 종류를 바로 골라 잡을 수 있고, `else` 절이 있다는 점이 다르다
