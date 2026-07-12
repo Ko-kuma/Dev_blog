@@ -1,0 +1,141 @@
+---
+title: "Python 기초 - json 모듈"
+date: "2026-07-12"
+category: "Back-End"
+tags: ["Python", "기초", "json", "파일입출력", "Phase1"]
+description: "json 모듈로 딕셔너리를 파일로 저장하고 불러오는 법, dump/load와 dumps/loads의 차이"
+thumbnail: "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+
+## json 모듈이란?
+
+파이썬의 딕셔너리·리스트 같은 데이터를, 파일로 저장하거나 다른 프로그램과 주고받을 수 있는 텍스트 형식(JSON)으로 바꿔주는 표준 라이브러리다.
+
+딕셔너리를 배울 때 "딕셔너리와 JSON은 구조가 사실상 같다"고 했었는데, 그 둘을 서로 변환해주는 도구가 바로 `json` 모듈이다. 딕셔너리는 파이썬 프로그램이 실행되는 동안에만 메모리에 존재하지만, JSON은 텍스트 형태라서 파일로 저장하거나 인터넷으로 전송할 수 있다.
+
+```python
+import json   # 표준 라이브러리라 별도 설치 없이 바로 사용 가능
+```
+
+실생활 비유: 딕셔너리는 냉장고 안에 정리된 반찬(파이썬 메모리 안의 살아있는 데이터)이고, JSON은 그 반찬을 여행용으로 진공포장한 것과 같다. 포장(JSON 텍스트)해야 냉장고 밖(파일, 네트워크)으로 들고 나갈 수 있고, 다시 꺼내 먹으려면(파이썬에서 쓰려면) 포장을 풀어서 원래 상태(딕셔너리)로 되돌려야 한다.
+
+## JSON과 Python의 json 모듈은 다른 것이다
+
+이름이 비슷해서 헷갈리기 쉬운데, 개발자들이 "JSON"이라고 말할 때는 대부분 **데이터 형식 자체**를 가리킨다. Python의 `json` 모듈은 그 형식을 Python에서 다룰 수 있게 해주는 도구일 뿐이다.
+
+| | JSON | Python의 json 모듈 |
+|---|---|---|
+| 정체 | 데이터 형식(포맷) 그 자체 | 그 형식을 다루는 Python 전용 도구 |
+| 언어 종속성 | 특정 언어에 속하지 않음 | Python에서만 쓰는 도구 |
+| 예시 | `{"name": "혜진"}`이라는 텍스트 형태 자체 | `json.dump()`, `json.loads()` 같은 함수들 |
+
+```json
+{
+  "name": "혜진",
+  "age": 30,
+  "is_active": true
+}
+```
+
+이 텍스트 자체가 JSON이다. Python 코드도 아니고 JS 코드도 아니다. 그냥 약속된 형식으로 쓰인 텍스트일 뿐이며, Python이든 JS든 Java든 어떤 언어에서도 공통으로 통용된다.
+
+실생활 비유: JSON은 전 세계 어디서나 통하는 국제 표준 서류 양식(여권 신청서 같은 것)이고, Python의 `json` 모듈은 그 양식을 한국어(Python)로 작성하고 읽을 수 있게 도와주는 번역 도구다. JS의 `JSON.stringify`/`JSON.parse`는 같은 양식을 영어(JS)로 작성하고 읽게 도와주는 번역 도구다. 서류 양식(JSON) 자체는 하나인데, 그걸 다루는 도구만 언어마다 다르다.
+
+**왜 개발자들이 JSON, JSON 하는가**: 프론트엔드(JS)와 백엔드(Python)는 서로 다른 언어를 쓰지만, 데이터를 주고받을 때는 JSON이라는 공통 형식을 쓰기로 약속했기 때문이다. API 통신, 설정 파일, DB 응답 등 언어를 초월해서 데이터를 주고받아야 하는 거의 모든 곳에서 JSON이 쓰인다.
+
+## 딕셔너리 → 파일: json.dump()
+
+```python
+data = {"name": "혜진", "age": 30, "is_active": True}
+
+with open("data.json", "w", encoding="utf-8") as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
+```
+
+`json.dump(데이터, 파일객체, ...)`는 딕셔너리(또는 리스트)를 받아서, 열려있는 파일에 JSON 텍스트로 바로 써준다.
+
+**자주 쓰는 옵션 두 가지**:
+
+- `ensure_ascii=False`: 기본값(`True`)으로 두면 한글이 유니코드 코드로 저장돼서 파일을 열어봐도 읽을 수 없다. `False`로 지정하면 한글이 그대로 저장된다.
+- `indent=2`: 값을 2칸씩 들여써서, 사람이 파일을 직접 열어봐도 구조를 알아보기 쉽게 만들어준다. 생략하면 한 줄로 압축되어 저장된다.
+
+> 함정: `ensure_ascii=False`를 빼먹으면 파일 자체는 정상 작동하지만, 텍스트 에디터로 직접 열었을 때 한글이 깨진 것처럼 보여서 당황할 수 있다. 실제로는 깨진 게 아니라 유니코드 코드로 표현된 것이지만, 사람이 읽기엔 불편하므로 한글 데이터를 다룰 땐 이 옵션을 켜두는 게 좋다.
+
+## 파일 → 딕셔너리: json.load()
+
+```python
+with open("data.json", "r", encoding="utf-8") as f:
+    data = json.load(f)
+
+print(data["name"])   # 혜진 (다시 평범한 딕셔너리로 돌아옴)
+```
+
+`json.load(파일객체)`는 JSON 텍스트가 담긴 파일을 읽어서, 파이썬 딕셔너리(또는 리스트)로 되돌려준다.
+
+## dump/load 와 dumps/loads의 차이 — s가 있고 없고
+
+`json` 모듈에는 이름이 비슷한 함수 네 개가 있어서 헷갈리기 쉽다. 기준은 파일과 직접 주고받는지, 아니면 문자열로만 다루는지다.
+
+| 함수 | 방향 | 대상 |
+|---|---|---|
+| `json.dump(data, f)` | 딕셔너리 → 파일 | 파일 객체에 바로 씀 |
+| `json.load(f)` | 파일 → 딕셔너리 | 파일 객체에서 바로 읽음 |
+| `json.dumps(data)` | 딕셔너리 → 문자열 | 파일 없이 문자열만 반환 |
+| `json.loads(text)` | 문자열 → 딕셔너리 | 파일 없이 문자열만 변환 |
+
+```python
+# s가 붙은 버전: 파일 없이 문자열만 다룸
+json_string = json.dumps({"name": "혜진"}, ensure_ascii=False)
+print(json_string)          # {"name": "혜진"} — 이건 그냥 문자열
+print(type(json_string))    # <class 'str'>
+
+data = json.loads(json_string)   # 문자열을 다시 딕셔너리로
+print(type(data))                  # <class 'dict'>
+```
+
+**외우는 팁**: `s`는 `string`의 약자다. s가 있으면 문자열(string)과 딕셔너리 사이를 오가고, s가 없으면 파일과 딕셔너리 사이를 오간다고 기억하면 헷갈리지 않는다.
+
+JS와 비교하면:
+
+| Python | JavaScript |
+|---|---|
+| `json.dumps(data)` (딕셔너리 → 문자열) | `JSON.stringify(data)` |
+| `json.loads(text)` (문자열 → 딕셔너리) | `JSON.parse(text)` |
+| `json.dump(data, f)` (딕셔너리 → 파일) | 전용 함수 없음 — `fs.writeFileSync(path, JSON.stringify(data))`처럼 직접 조합 |
+
+JS는 문자열 변환(`stringify`/`parse`)까지만 표준으로 제공하고, 파일 저장은 별도의 파일 시스템 모듈과 조합해서 써야 한다. Python은 파일과 직접 주고받는 `dump`/`load`까지 한 번에 제공한다는 점이 다르다.
+
+## 리스트 안의 객체들 저장하기
+
+여러 개의 딕셔너리(또는 딕셔너리로 변환한 객체)를 리스트로 묶어서 저장하는 경우도 많다.
+
+```python
+tasks = [
+    {"title": "장보기", "done": False},
+    {"title": "운동하기", "done": True},
+]
+
+with open("tasks.json", "w", encoding="utf-8") as f:
+    json.dump(tasks, f, ensure_ascii=False, indent=2)
+```
+
+**클래스 인스턴스는 바로 저장이 안 된다**: `json.dump()`는 딕셔너리, 리스트, 문자열, 숫자, 불리언, `None`만 이해할 수 있다. `Task` 같은 클래스 인스턴스를 그대로 넘기면 에러가 난다.
+
+```python
+json.dump(my_task_instance, f)   # TypeError: Object of type Task is not JSON serializable
+```
+
+그래서 클래스에 `to_dict()` 같은 메서드를 직접 만들어서, 저장하기 직전에 인스턴스를 딕셔너리로 변환해주는 과정이 필요하다. 할 일 목록 앱의 `Task.to_dict()`가 정확히 이 역할을 한 것이다.
+
+**실무에서는 이렇게 쓴다**: 설정 파일 읽고 쓰기, API 응답 데이터를 그대로 파일에 캐싱해두기, 프로그램 상태를 저장했다가 다음 실행 때 이어서 시작하기 등 다양한 곳에서 쓰인다. FastAPI에서 API 요청/응답을 다룰 때도 내부적으로 이 원리가 그대로 쓰인다.
+
+## 요약
+
+- JSON은 특정 언어에 속하지 않는 데이터 형식 자체이고, Python의 `json` 모듈은 그 형식을 Python에서 다루게 해주는 도구다. 이 둘을 구분해서 이해해야 한다
+- `json` 모듈은 딕셔너리(파이썬 메모리 안의 데이터)와 JSON(텍스트, 파일·네트워크로 주고받을 수 있는 형태) 사이를 변환해준다
+- `json.dump(data, f)`로 딕셔너리를 파일에 저장하고, `json.load(f)`로 파일에서 딕셔너리로 불러온다
+- `json.dumps(data)`/`json.loads(text)`는 파일 없이 문자열만 다룬다. `s`는 string의 약자
+- `ensure_ascii=False`로 한글이 깨지지 않게, `indent=2`로 사람이 읽기 좋게 저장할 수 있다
+- 함정: `ensure_ascii=False`를 빼먹으면 한글이 유니코드 코드로 저장돼서 파일을 직접 열었을 때 알아보기 어렵다
+- 함정: 클래스 인스턴스는 그대로 저장할 수 없어서, `to_dict()` 같은 메서드로 먼저 딕셔너리로 변환해야 한다
+- JS는 문자열 변환(`JSON.stringify`/`parse`)까지만 표준 제공하지만, Python은 파일과 직접 주고받는 `dump`/`load`까지 한 번에 제공한다
