@@ -2,8 +2,8 @@
 title: "Python 기초 - json 모듈"
 date: "2026-07-12"
 category: "Back-End"
-tags: ["Python", "기초", "json", "파일입출력", "Phase1"]
-description: "json 모듈로 딕셔너리를 파일로 저장하고 불러오는 법, dump/load와 dumps/loads의 차이"
+tags: ["Python", "기초", "json", "파일입출력", "FastAPI"]
+description: "json 모듈로 딕셔너리를 파일로 저장하고 불러오는 법, JSON과 딕셔너리의 차이, FastAPI의 return이 JSON이 되는 원리 미리보기"
 thumbnail: "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
 ---
 
@@ -42,6 +42,43 @@ import json   # 표준 라이브러리라 별도 설치 없이 바로 사용 가
 실생활 비유: JSON은 전 세계 어디서나 통하는 국제 표준 서류 양식(여권 신청서 같은 것)이고, Python의 `json` 모듈은 그 양식을 한국어(Python)로 작성하고 읽을 수 있게 도와주는 번역 도구다. JS의 `JSON.stringify`/`JSON.parse`는 같은 양식을 영어(JS)로 작성하고 읽게 도와주는 번역 도구다. 서류 양식(JSON) 자체는 하나인데, 그걸 다루는 도구만 언어마다 다르다.
 
 **왜 개발자들이 JSON, JSON 하는가**: 프론트엔드(JS)와 백엔드(Python)는 서로 다른 언어를 쓰지만, 데이터를 주고받을 때는 JSON이라는 공통 형식을 쓰기로 약속했기 때문이다. API 통신, 설정 파일, DB 응답 등 언어를 초월해서 데이터를 주고받아야 하는 거의 모든 곳에서 JSON이 쓰인다.
+
+**JSON 데이터는 주석이 아니다**: JSON 파일 안의 내용은 사람이 참고하라고 남긴 메모(주석)가 아니라, 프로그램이 실제로 읽고 사용하는 진짜 데이터 그 자체다. 지우면 데이터가 통째로 사라진다. 참고로 JSON 형식 자체는 문법적으로 주석(`#`, `//` 등)을 지원하지 않는다 — "순수하게 데이터만 담자"는 형식이기 때문이다.
+
+## JSON의 기호는 Python의 어떤 자료형이 되는가
+
+JSON은 중괄호(`{ }`)와 대괄호(`[ ]`) 두 가지 묶음 기호를 쓰는데, Python으로 읽어들이면 각각 다른 자료형이 된다.
+
+```json
+{"name": "혜진", "age": 30}
+```
+
+```python
+data = json.loads('{"name": "혜진", "age": 30}')
+print(type(data))    # <class 'dict'> — 중괄호는 딕셔너리로 변환
+```
+
+```json
+["사과", "바나나", "포도"]
+```
+
+```python
+data = json.loads('["사과", "바나나", "포도"]')
+print(type(data))    # <class 'list'> — 대괄호는 리스트로 변환
+```
+
+전체 대응표로 정리하면:
+
+| JSON 기호 | 의미 | Python으로 변환되면 |
+|---|---|---|
+| `{ }` (중괄호) | 객체 (key-value 쌍) | `dict` |
+| `[ ]` (대괄호) | 배열 (값들의 나열) | `list` |
+| `"문자열"` | 문자열 | `str` |
+| `123` | 숫자 | `int` / `float` |
+| `true` / `false` | 참/거짓 | `True` / `False` |
+| `null` | 값 없음 | `None` |
+
+JSON의 구조(중괄호/대괄호로 짜여진 모양)와 Python의 딕셔너리/리스트 구조가 원래부터 거의 똑같이 생겼기 때문에, `json.load()`나 `json.loads()`가 그 모양을 그대로 Python 자료형으로 옮겨주는 것이다.
 
 ## 딕셔너리 → 파일: json.dump()
 
@@ -119,6 +156,31 @@ with open("tasks.json", "w", encoding="utf-8") as f:
     json.dump(tasks, f, ensure_ascii=False, indent=2)
 ```
 
+### 중첩된 값도 그냥 딕셔너리일 뿐, 함수가 아니다
+
+JSON 값 중에는 이렇게 key의 값이 또 다른 key-value 묶음인 경우가 있다.
+
+```json
+{
+  "name": "혜진",
+  "address": {
+    "city": "성남",
+    "zipcode": "13529"
+  }
+}
+```
+
+`"address"`의 값이 key-value 쌍(`city`, `zipcode`)을 가지고 있다 보니 "이것도 함수 아닌가?"라고 헷갈릴 수 있는데, **이건 함수가 아니라 딕셔너리 안에 또 다른 딕셔너리가 들어있는 것뿐**이다. 이를 **중첩 딕셔너리**라고 부른다.
+
+```python
+data = json.loads(...)
+print(type(data["address"]))   # <class 'dict'> — 함수가 아니라 그냥 딕셔너리
+```
+
+딕셔너리와 함수는 완전히 다른 존재다. 딕셔너리는 이미 정해진 값을 저장해두는 상자이고, 함수는 실행되는 순간 로직을 처리해서 결과를 만들어내는 코드 뭉치다. `person["city"]`처럼 key를 넣으면 값이 나오는 동작이 `get_city()`처럼 함수를 호출해서 결과를 받는 것과 겉보기에 비슷해 보일 수 있지만, 전자는 이미 저장된 값을 그냥 꺼내오는 것이고 후자는 매번 계산해서 새로 만들어내는 것이라는 근본적인 차이가 있다.
+
+## 클래스 인스턴스는 그대로 저장할 수 없다
+
 **클래스 인스턴스는 바로 저장이 안 된다**: `json.dump()`는 딕셔너리, 리스트, 문자열, 숫자, 불리언, `None`만 이해할 수 있다. `Task` 같은 클래스 인스턴스를 그대로 넘기면 에러가 난다.
 
 ```python
@@ -129,13 +191,146 @@ json.dump(my_task_instance, f)   # TypeError: Object of type Task is not JSON se
 
 **실무에서는 이렇게 쓴다**: 설정 파일 읽고 쓰기, API 응답 데이터를 그대로 파일에 캐싱해두기, 프로그램 상태를 저장했다가 다음 실행 때 이어서 시작하기 등 다양한 곳에서 쓰인다. FastAPI에서 API 요청/응답을 다룰 때도 내부적으로 이 원리가 그대로 쓰인다.
 
+## 추가 학습 — JSON과 FastAPI에서 헷갈렸던 부분
+
+### `return` 안의 `{}`는 JSON이 아니다
+
+FastAPI 코드를 처음 보면 아래 코드를 보고 헷갈리기 쉽다.
+
+```python
+@app.get("/")
+def home():
+    return {
+        "name": "혜진",
+        "age": 30
+    }
+```
+
+`return` 안에 있는 `{}`가 JSON이라고 생각하기 쉽다. 하지만 실제로는 Python의 딕셔너리(dict)다. `return`도 Python 문법이기 때문에 함수가 반환하는 값 역시 Python 객체다.
+
+즉, 위 코드는 JSON을 반환하는 것이 아니라 **딕셔너리를 반환**하는 것이다.
+
+### FastAPI는 함수의 반환값을 JSON으로 변환한다
+
+그렇다면 왜 브라우저에서는 JSON으로 보일까? 그 이유는 FastAPI가 함수가 끝난 뒤 반환값을 받아 JSON으로 변환하기 때문이다. 흐름은 다음과 같다.
+
+```text
+Python 함수 실행
+        │
+return dict
+        │
+        ▼
+FastAPI
+        │
+dict → JSON 변환
+        │
+        ▼
+브라우저로 전송
+```
+
+즉, Python 함수 → 딕셔너리 반환 → FastAPI → 딕셔너리를 JSON으로 변환 → 브라우저 → JSON을 받음, 이라는 순서로 동작한다.
+
+### FastAPI는 `return`으로 반환된 값만 사용한다
+
+FastAPI가 Python 코드 전체를 처리하는 것은 아니다. 예를 들어:
+
+```python
+@app.get("/")
+def home():
+    print("안녕하세요")
+
+    data = {
+        "name": "혜진"
+    }
+
+    return data
+```
+
+실행 순서는 다음과 같다.
+
+```text
+print()
+↓
+콘솔 출력
+
+return data
+↓
+FastAPI가 반환값을 받음
+↓
+JSON으로 변환
+↓
+브라우저 전송
+```
+
+즉, `print()`는 서버 콘솔에만 출력된다. FastAPI는 함수가 `return`한 값만 받아 응답을 만든다.
+
+### `return`이 JSON을 만드는 것은 아니다
+
+처음에는 "`return`하면 JSON이 되는구나"라고 생각하기 쉽다. 하지만 정확한 표현은 **"FastAPI가 `return`된 딕셔너리를 JSON으로 변환한다"**이다. `return`은 단순히 값을 반환하는 Python 문법이며, JSON으로 바꾸는 역할은 FastAPI가 담당한다.
+
+### JSON과 딕셔너리가 헷갈리는 이유
+
+둘은 구조가 거의 똑같이 생겼다. Python에서는
+
+```python
+data = {
+    "name": "혜진"
+}
+```
+
+는 딕셔너리(dict)이고, JSON에서는
+
+```json
+{
+  "name": "혜진"
+}
+```
+
+는 텍스트 형식의 데이터(JSON)다. 모양은 거의 같지만, Python에서는 자료형(dict)이고 JSON에서는 데이터 형식(텍스트)이라는 차이가 있다.
+
+### Python에서 json 모듈을 사용하는 이유
+
+Python은 JSON을 직접 사용하는 것이 아니라 딕셔너리를 사용한다. 하지만 파일에 저장하거나 다른 프로그램과 데이터를 주고받을 때는 JSON 형식을 사용해야 한다. 그래서 `json` 모듈이 두 형식 사이를 서로 변환해준다.
+
+```text
+Python dict
+      │
+json.dump() / json.dumps()
+      ▼
+JSON
+```
+
+반대로
+
+```text
+JSON
+      │
+json.load() / json.loads()
+      ▼
+Python dict
+```
+
+처럼 다시 Python에서 사용할 수 있는 딕셔너리로 변환한다. 즉, `json` 모듈은 Python 자료형과 JSON 형식 사이를 서로 변환해주는 도구다.
+
+### 지금 단계에서 기억할 것
+
+현재는 FastAPI를 배우기 전이므로 모든 내용을 외울 필요는 없다. 지금은 아래 한 문장만 이해해도 충분하다.
+
+> Python에서는 딕셔너리를 사용하고, 필요할 때 `json` 모듈이 JSON으로 변환한다. FastAPI를 배우게 되면 함수가 반환한 딕셔너리를 FastAPI가 자동으로 JSON으로 변환해서 브라우저에 보내준다.
+
+나중에 FastAPI를 배울 때 "왜 `return`만 했는데 JSON이 되지?"라는 의문이 생기면 이 섹션으로 다시 돌아와서 읽으면 된다.
+
 ## 요약
 
 - JSON은 특정 언어에 속하지 않는 데이터 형식 자체이고, Python의 `json` 모듈은 그 형식을 Python에서 다루게 해주는 도구다. 이 둘을 구분해서 이해해야 한다
+- JSON 데이터는 주석이 아니라 프로그램이 실제로 읽고 쓰는 진짜 데이터다. JSON 형식 자체는 문법적으로 주석을 지원하지 않는다
+- JSON의 `{ }`(중괄호)는 Python의 `dict`로, `[ ]`(대괄호)는 `list`로 변환된다. `true/false`→`True/False`, `null`→`None`
 - `json` 모듈은 딕셔너리(파이썬 메모리 안의 데이터)와 JSON(텍스트, 파일·네트워크로 주고받을 수 있는 형태) 사이를 변환해준다
 - `json.dump(data, f)`로 딕셔너리를 파일에 저장하고, `json.load(f)`로 파일에서 딕셔너리로 불러온다
 - `json.dumps(data)`/`json.loads(text)`는 파일 없이 문자열만 다룬다. `s`는 string의 약자
 - `ensure_ascii=False`로 한글이 깨지지 않게, `indent=2`로 사람이 읽기 좋게 저장할 수 있다
+- 중첩된 key-value 구조(중첩 딕셔너리)는 함수가 아니라 그냥 딕셔너리 안에 또 다른 딕셔너리가 들어있는 것이다. 딕셔너리는 저장된 값을 꺼내오는 것이고, 함수는 실행해서 값을 계산해내는 것이라는 근본적인 차이가 있다
+- 미리보기: FastAPI에서 `return {"name": "혜진"}`은 JSON을 반환하는 게 아니라 딕셔너리를 반환하는 것이며, FastAPI가 그 딕셔너리를 받아 JSON으로 변환해서 브라우저로 보내준다
 - 함정: `ensure_ascii=False`를 빼먹으면 한글이 유니코드 코드로 저장돼서 파일을 직접 열었을 때 알아보기 어렵다
 - 함정: 클래스 인스턴스는 그대로 저장할 수 없어서, `to_dict()` 같은 메서드로 먼저 딕셔너리로 변환해야 한다
 - JS는 문자열 변환(`JSON.stringify`/`parse`)까지만 표준 제공하지만, Python은 파일과 직접 주고받는 `dump`/`load`까지 한 번에 제공한다
