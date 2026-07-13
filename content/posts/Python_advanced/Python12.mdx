@@ -1,0 +1,128 @@
+---
+title: "Python 심화 - 정적/클래스 메서드와 property (@staticmethod, @classmethod, @property)"
+date: "2026-07-13"
+category: "Back-End"
+tags: ["Python", "심화", "클래스", "staticmethod", "classmethod", "property", "데코레이터"]
+description: "인스턴스 메서드와 다르게 동작하는 @staticmethod, @classmethod, @property의 차이와 실무 활용"
+thumbnail: "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+
+## 참고 자료
+
+자료에서 사용하는 CS 용어 정리입니다.
+
+[Python 심화 - 정적/클래스 메서드와 property CS용어 정리](/posts/Python12cs정리)
+
+---
+
+## 지금까지 배운 것과 무엇이 다른가
+
+기초 단계(클래스 기초 편)에서 만든 메서드는 전부 `self`를 받는 **인스턴스 메서드**였다. `self`가 있다는 건 "이 메서드는 특정 인스턴스(예: `my_dog`)의 정보에 접근한다"는 뜻이다.
+
+그런데 실무 코드를 보면 `self` 없이 호출되는 메서드나, 함수인데 괄호 없이 속성처럼 쓰는 코드가 자주 보인다. `@staticmethod`, `@classmethod`, `@property` 세 데코레이터가 그 차이를 만든다. FastAPI와 함께 쓰는 Pydantic 모델에서도 자주 등장하는 패턴이라 미리 익혀둔다.
+
+## @staticmethod — 인스턴스와 무관한 클래스 소속 함수
+
+```python
+class Dog:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    @staticmethod
+    def is_valid_age(age):   # self가 없다 — 특정 강아지 정보가 필요 없는 로직이기 때문
+        return 0 <= age <= 20
+
+# 인스턴스를 만들지 않고도 클래스 이름으로 바로 호출 가능
+print(Dog.is_valid_age(3))    # True
+print(Dog.is_valid_age(100))  # False
+```
+
+실생활 비유: 회사 안에 있지만 특정 직원 개인 정보와는 무관한 "공용 규정집" 같은 것이다. 나이가 유효한지 검사하는 규칙은 특정 강아지 개체와 상관없이 언제나 동일하게 적용된다.
+
+> 함정: `@staticmethod`는 `self`도 `cls`도 받지 않기 때문에, 그 메서드 안에서 인스턴스 속성(`self.name`)이나 클래스 변수에 접근할 수 없다. 그런 접근이 필요하다면 애초에 `@staticmethod`를 쓸 상황이 아니다.
+
+## @classmethod — cls를 받는 대안 생성자
+
+```python
+class Dog:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    @classmethod
+    def from_string(cls, data_str):   # self 대신 cls(클래스 자기 자신)를 받음
+        # "초코,3" 같은 문자열을 파싱해서 Dog 인스턴스를 만들어주는 대안 생성자
+        name, age = data_str.split(",")
+        return cls(name, int(age))    # cls(...)는 곧 Dog(...)와 같음
+
+my_dog = Dog.from_string("초코,3")
+print(my_dog.name, my_dog.age)   # 초코 3
+```
+
+실생활 비유: 같은 붕어빵을 굽는데, 재료를 준비하는 방식만 다른 "대체 조립 라인"이다. 기본 조립 라인(`__init__`)은 이름과 나이를 따로따로 받지만, 이 조립 라인은 "초코,3" 같은 문자열 하나만 받아서 알아서 나눠 넣는다.
+
+**`cls`를 쓰는 이유**: `Dog` 대신 `cls`라고 적어두면, 나중에 `Dog`를 상속받은 자식 클래스(`Puppy` 등)가 `from_string`을 그대로 물려받아 썼을 때도 `Dog(...)`가 아니라 `Puppy(...)`가 만들어진다. 클래스 이름을 하드코딩하지 않아서 상속 구조에서도 올바르게 동작한다.
+
+## @property — 메서드를 속성처럼 보이게 하기
+
+```python
+class Dog:
+    def __init__(self, name, age):
+        self.name = name
+        self._age = age   # 앞에 _를 붙여 "직접 건드리지 말 것"이라는 관례를 표시
+
+    @property
+    def age(self):        # 메서드인데 괄호 없이 my_dog.age 로 접근 가능해짐
+        return self._age
+
+    @age.setter
+    def age(self, value):  # my_dog.age = 5 처럼 대입할 때 실행되는 검증 로직
+        if value < 0:
+            raise ValueError("나이는 음수일 수 없습니다")
+        self._age = value
+
+my_dog = Dog("초코", 3)
+print(my_dog.age)   # 3 — 괄호 없이 접근 (property)
+
+my_dog.age = 10      # setter 실행됨, 문제 없음
+my_dog.age = -1      # ValueError: 나이는 음수일 수 없습니다
+```
+
+실생활 비유: 직원에게 월급을 물어볼 때 `직원.월급()`처럼 함수를 실행하듯 묻지 않고 `직원.월급`처럼 그냥 물어보는 것과 같다. 겉보기엔 값을 그냥 꺼내오는 것 같지만, 뒤에서는 검증이나 계산 로직이 몰래 실행된다.
+
+> 함정: `@property`만 만들고 `@age.setter`를 만들지 않으면 그 속성은 읽기 전용이 된다. `my_dog.age = 10`을 실행하면 `AttributeError: can't set attribute`가 발생한다. "이 값은 계산만 되고 바꿀 수 없어야 한다"는 의도라면 오히려 이 동작이 장점이 된다.
+
+## JS와 비교
+
+| Python | JavaScript |
+|---|---|
+| `@staticmethod` | `static` 키워드 (`static isValidAge(age) {...}`) |
+| `@classmethod` | 정확히 대응하는 문법 없음 (Python 고유 패턴) |
+| `@property` (getter) | `get age() {...}` |
+| `@age.setter` | `set age(value) {...}` |
+
+## 실무에서는 이렇게 쓴다
+
+FastAPI와 함께 쓰는 Pydantic 모델에서 `@property`는 저장하지 않아도 되는 계산된 필드를 만들 때 자주 쓴다.
+
+```python
+class User(BaseModel):
+    first_name: str
+    last_name: str
+
+    @property
+    def full_name(self):   # DB에 따로 저장할 필요 없는 계산값
+        return f"{self.first_name} {self.last_name}"
+```
+
+`@classmethod`는 Pydantic의 커스텀 검증 로직(`@field_validator` 등)이나, JSON 문자열·DB row 같은 다른 형태의 데이터로부터 인스턴스를 만드는 대안 생성자에 흔히 쓰인다.
+
+## 요약
+
+- 인스턴스 메서드(`self` 받음)는 특정 인스턴스 정보에 접근할 때, `@staticmethod`(아무것도 안 받음)는 인스턴스와 무관한 클래스 소속 로직에 쓴다
+- `@classmethod`(`cls` 받음)는 다른 형태의 데이터로부터 인스턴스를 만드는 대안 생성자를 만들 때 쓴다. `cls`를 쓰면 상속받은 자식 클래스에서도 올바르게 동작한다
+- `@property`는 메서드를 속성처럼 괄호 없이 접근하게 해주고, `@속성명.setter`를 함께 정의하면 값을 대입할 때 검증 로직을 끼워 넣을 수 있다
+- 함정: `@staticmethod`는 `self`/`cls`가 없어 인스턴스·클래스 상태에 접근 불가. `@property`에 `setter`가 없으면 읽기 전용이라 대입 시 `AttributeError` 발생
+- JS와 비교하면 `@staticmethod`는 `static`, `@property`는 `get`/`set`과 대응되지만, `@classmethod`는 Python에만 있는 개념이다
+- FastAPI/Pydantic에서 `@property`는 계산된 필드, `@classmethod`는 커스텀 검증·대안 생성자에 자주 쓰인다
