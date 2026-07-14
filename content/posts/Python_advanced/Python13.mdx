@@ -1,0 +1,157 @@
+---
+title: "Python 심화 - 상속 심화 (super(), 메서드 오버라이딩, 다중상속)"
+date: "2026-07-14"
+category: "Back-End"
+tags: ["Python", "심화", "클래스", "상속", "super", "다중상속", "MRO"]
+description: "super()로 부모 메서드 호출하기, 메서드 오버라이딩, 다중상속과 MRO 개념"
+thumbnail: "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+
+## 참고 자료
+
+자료에서 사용하는 CS 용어 정리입니다.
+
+[Python 심화 - 상속 심화 CS용어 정리](/posts/Python13cs정리)
+
+---
+
+## 지금까지 배운 것과 무엇이 다른가
+
+기초 단계(Python10)에서 배운 상속은 `class Dog(Animal):`처럼 부모의 기능을 그대로 물려받는 것까지였다. 그런데 자식 클래스에서 `__init__`을 새로 정의해야 하는 경우, 부모가 하던 초기화 작업까지 자식이 통째로 다시 써야 할까? 그리고 여러 부모를 동시에 상속받으면 어떤 일이 벌어질까? 오늘은 이 두 질문을 다룬다.
+
+## super() — 부모의 메서드를 그대로 호출하기
+
+```python
+class Animal:
+    def __init__(self, name):
+        self.name = name
+
+    def eat(self):
+        return f"{self.name}가 밥을 먹는다"
+
+class Dog(Animal):
+    def __init__(self, name, breed):
+        super().__init__(name)   # 부모(Animal)의 __init__을 그대로 호출해서 name을 채움
+        self.breed = breed        # Dog만의 추가 속성
+
+my_dog = Dog("초코", "푸들")
+print(my_dog.name)    # 초코 — 부모의 __init__ 덕분에 채워짐
+print(my_dog.breed)   # 푸들 — 자식만의 속성
+```
+
+`super()`는 "지금 이 클래스의 부모"를 가리킨다. `super().__init__(name)`은 "부모가 원래 하던 초기화 작업을 그대로 실행해달라"는 뜻이다.
+
+실생활 비유: 새로 생긴 지점(자식 클래스)이 영업을 시작할 때, 본사(부모 클래스)의 기본 개업 절차를 그대로 따르면서 지점만의 추가 절차(간판 설치 등)를 덧붙이는 것과 같다. 본사 절차를 처음부터 다시 만들 필요 없이 `super()`로 그대로 가져다 쓴다.
+
+> 함정: `Dog`에서 `__init__`을 새로 정의하면서 `super().__init__(name)`을 빼먹으면, `Animal`이 하던 초기화(`self.name = name`)가 실행되지 않는다. `my_dog.name`에 접근하는 순간 `AttributeError`가 발생한다. 자식 클래스에서 `__init__`을 재정의할 때는 부모의 초기화가 계속 필요한지부터 확인해야 한다.
+
+## 메서드 오버라이딩 (Method Overriding)
+
+부모에게 물려받은 메서드를, 자식 클래스에서 같은 이름으로 다시 정의해서 동작을 바꾸는 것이다.
+
+```python
+class Animal:
+    def __init__(self, name):
+        self.name = name
+
+    def sound(self):
+        return "..."
+
+class Dog(Animal):
+    def sound(self):          # 부모의 sound()를 자식이 재정의(override)
+        return f"{self.name}: 멍멍!"
+
+class Cat(Animal):
+    def sound(self):          # Cat도 자기만의 sound()로 재정의
+        return f"{self.name}: 야옹!"
+
+animals = [Dog("초코"), Cat("나비")]
+for a in animals:
+    print(a.sound())   # 같은 sound() 호출인데 실제 클래스에 따라 다르게 동작
+```
+
+```text
+초코: 멍멍!
+나비: 야옹!
+```
+
+실생활 비유: "인사하기"라는 같은 이름의 행동이라도, 한국 지점은 허리를 숙이고 미국 지점은 악수를 하는 것과 같다. 본사가 정해준 "인사하기"라는 이름은 같지만, 각 지점(자식 클래스)이 자기 상황에 맞게 실제 동작을 다시 정의한다.
+
+**부모 기능도 유지하면서 덧붙이고 싶다면** `super()`를 함께 쓴다:
+
+```python
+class Dog(Animal):
+    def sound(self):
+        base = super().sound()          # 부모의 기존 동작도 가져오고
+        return f"{base} 그리고 멍멍!"    # 거기에 덧붙임
+```
+
+## 다중상속과 MRO (Method Resolution Order)
+
+Python은 부모를 두 개 이상 동시에 상속받는 다중상속을 지원한다.
+
+```python
+class Swimmer:
+    def move(self):
+        return "헤엄친다"
+
+class Runner:
+    def move(self):
+        return "달린다"
+
+class Duck(Swimmer, Runner):   # 두 부모를 동시에 상속
+    pass
+
+d = Duck()
+print(d.move())   # 헤엄친다 — Swimmer, Runner 순서 중 먼저 적은 쪽이 우선
+```
+
+두 부모가 똑같은 이름의 메서드(`move`)를 갖고 있으면, 어느 쪽을 따를지 애매해진다. Python은 이걸 `class Duck(Swimmer, Runner):`에 **적은 순서대로** 우선순위를 정한다. 이 우선순위 규칙을 MRO(Method Resolution Order, 메서드 탐색 순서)라고 부른다.
+
+```python
+print(Duck.__mro__)
+# (<class 'Duck'>, <class 'Swimmer'>, <class 'Runner'>, <class 'object'>)
+# Duck에서 메서드를 찾을 때 이 순서대로 탐색한다
+```
+
+실생활 비유: 한 사람이 아버지와 어머니 양쪽에서 유산(기능)을 물려받았는데, 두 분이 서로 다른 조언을 남겼다면 유언장에 먼저 적힌 쪽을 따르기로 미리 정해둔 것과 같다. `class Duck(Swimmer, Runner):`에서 `Swimmer`를 먼저 적었으니, 겹치는 부분은 `Swimmer`의 방식을 따른다.
+
+> 함정: 다중상속은 강력하지만, 부모가 많아질수록 "이 메서드가 정확히 어느 부모에서 왔는지" 추적하기 어려워진다. 실무에서는 정말 필요한 경우가 아니면 다중상속보다 단일 상속이나 조합(composition)을 우선 고려하는 것이 좋다.
+
+## JS와 비교
+
+| Python | JavaScript |
+|---|---|
+| `super().__init__(name)` | `super(name)` (constructor 안에서) |
+| `super().sound()` | `super.sound()` |
+| 다중상속 직접 지원 (`class Duck(Swimmer, Runner):`) | 클래스 다중상속 미지원. Mixin 패턴으로 흉내만 가능 |
+
+가장 큰 차이는 다중상속이다. JS는 클래스가 부모를 하나만 가질 수 있어서, 여러 기능을 섞고 싶으면 Mixin이라는 별도 패턴을 써야 한다. Python은 문법 자체로 다중상속을 지원하지만, 그만큼 MRO 같은 규칙을 이해하고 있어야 한다.
+
+## 실무에서는 이렇게 쓴다
+
+FastAPI/Pydantic에서는 공통 필드를 가진 기본 모델을 만들고, 상황별로 상속받아 확장하는 패턴이 흔하다.
+
+```python
+class UserBase(BaseModel):
+    email: str
+    name: str
+
+class UserCreate(UserBase):      # 회원가입 시: 비밀번호까지 추가로 받음
+    password: str
+
+class UserResponse(UserBase):    # 응답 시: id는 추가하되 비밀번호는 노출하지 않음
+    id: int
+```
+
+`super()`는 SQLAlchemy 모델이나 커스텀 예외 클래스에서 부모의 초기화 로직을 재사용할 때 자주 등장한다.
+
+## 요약
+
+- `super()`는 부모 클래스를 가리키며, `super().__init__(...)`으로 부모의 초기화 로직을 재사용할 수 있다
+- 함정: 자식이 `__init__`을 재정의하면서 `super().__init__()`을 빼먹으면 부모가 설정하던 속성이 채워지지 않아 `AttributeError`가 난다
+- 메서드 오버라이딩은 부모의 메서드를 자식이 같은 이름으로 재정의하는 것이며, 같은 이름의 호출이 실제 클래스에 따라 다르게 동작하게 해준다
+- `super().메서드()`를 오버라이딩 안에서 호출하면, 부모의 기존 동작을 유지하면서 덧붙일 수 있다
+- 다중상속은 부모를 여러 개 동시에 상속받는 것이며, 겹치는 메서드는 MRO(적은 순서 기준)에 따라 우선순위가 정해진다
+- 함정: 다중상속은 구조가 복잡해질수록 추적이 어려워지므로, 꼭 필요한 경우가 아니면 단일 상속을 우선 고려한다
+- JS와 달리 Python은 클래스 다중상속을 문법으로 직접 지원한다
