@@ -1,0 +1,145 @@
+---
+title: "Python 심화 - 매직 메서드 심화 (__repr__, __eq__, __lt__, __len__)"
+date: "2026-07-15"
+category: "Back-End"
+tags: ["Python", "심화", "매직메서드", "던더메서드", "연산자오버로딩"]
+description: "__repr__과 __str__의 차이, __eq__/__lt__로 비교 연산자 정의하기, __len__으로 len() 지원하기"
+thumbnail: "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+
+## 참고 자료
+
+자료에서 사용하는 CS 용어 정리입니다.
+
+[Python 심화 - 매직 메서드 심화 CS용어 정리](/posts/Python14cs정리)
+
+---
+
+## 지금까지 배운 것과 무엇이 다른가
+
+Python10에서 `__init__`과 `__str__` 두 매직 메서드를 배웠다. 오늘은 그 개념을 넓혀서, 왜 `my_dog1 == my_dog2`나 `sorted(dogs)`, `len(my_list)`처럼 Python 내장 문법이 직접 만든 클래스에도 그대로 통하게 만들 수 있는지를 다룬다. 정답은 전부 매직 메서드다 — 특정 연산자나 내장 함수가 실행될 때 Python이 자동으로 호출해주는 이름이 정해진 메서드들이다.
+
+## __repr__ — 개발자를 위한 표현
+
+`__str__`은 `print()`했을 때 보여줄, 사람이 읽기 좋은 문자열을 정의했다. `__repr__`은 비슷하지만 목적이 다르다 — 개발자가 디버깅할 때 "이 객체가 정확히 뭔지" 알아보기 위한 표현이다.
+
+```python
+class Dog:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def __repr__(self):
+        return f"Dog(name={self.name!r}, age={self.age})"   # !r은 값을 repr() 형태로 넣으라는 표시
+
+my_dog = Dog("초코", 3)
+print(my_dog)          # Dog(name='초코', age=3) — __str__이 없으면 __repr__이 대신 쓰임
+print([my_dog])        # [Dog(name='초코', age=3)] — 리스트 안에 담겼을 때는 항상 __repr__이 쓰임
+```
+
+**`__str__`과 `__repr__` 둘 다 있다면**: `print(인스턴스)`는 `__str__`을 우선 쓰고, 리스트나 딕셔너리 안에 담겨서 출력될 때는 `__repr__`이 쓰인다.
+
+실생활 비유: `__str__`은 손님에게 보여주는 메뉴판 설명("얼큰한 김치찌개")이고, `__repr__`은 주방 직원이 정확히 알아볼 수 있는 조리 코드("KIMCHI_JJIGAE-spicy-lv3")다. 둘 다 같은 음식을 가리키지만 보는 대상이 다르다.
+
+> 함정: `__repr__`을 아예 정의하지 않으면 `<__main__.Dog object at 0x7f...>`처럼 메모리 주소만 보여서 디버깅할 때 아무 정보도 못 얻는다. 실무에서는 `__str__`보다 `__repr__`을 먼저, 그리고 반드시 정의해두는 것이 관례다.
+
+## __eq__ — == 연산자 정의하기
+
+기본적으로 클래스로 만든 두 인스턴스를 `==`로 비교하면 "완전히 같은 메모리 주소를 가진 객체인가"만 확인한다.
+
+```python
+class Dog:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+dog1 = Dog("초코", 3)
+dog2 = Dog("초코", 3)
+print(dog1 == dog2)   # False — 내용은 같지만 서로 다른 인스턴스라서
+```
+
+"이름과 나이가 같으면 같은 강아지로 취급하고 싶다"면 `__eq__`를 직접 정의한다.
+
+```python
+class Dog:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def __eq__(self, other):   # other는 비교 대상(오른쪽 값)
+        return self.name == other.name and self.age == other.age
+
+dog1 = Dog("초코", 3)
+dog2 = Dog("초코", 3)
+print(dog1 == dog2)   # True — 이제 내용을 기준으로 비교함
+```
+
+`dog1 == dog2`라고 쓰면 Python은 내부적으로 `dog1.__eq__(dog2)`를 호출한다. 즉 `==`는 겉보기엔 연산자지만, 실제로는 `__eq__`라는 메서드 호출을 짧게 쓰는 문법일 뿐이다.
+
+> 함정: `__eq__`를 정의하면 Python은 그 클래스의 인스턴스를 기본적으로 해시 불가능(unhashable)한 것으로 취급해서, `set`에 넣거나 딕셔너리의 key로 쓸 수 없게 된다. 그런 용도가 필요하다면 `__hash__`도 함께 정의해줘야 한다.
+
+## __lt__ — 정렬 가능하게 만들기
+
+`sorted()`나 `<` 비교가 동작하려면 `__lt__`("less than"의 줄임)를 정의해야 한다.
+
+```python
+class Dog:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def __lt__(self, other):   # self < other 일 때 실행됨
+        return self.age < other.age
+
+    def __repr__(self):
+        return f"Dog({self.name}, {self.age})"
+
+dogs = [Dog("초코", 3), Dog("보리", 1), Dog("두부", 5)]
+print(sorted(dogs))   # [Dog(보리, 1), Dog(초코, 3), Dog(두부, 5)] — 나이 순으로 정렬됨
+```
+
+`sorted()`는 리스트 안의 두 요소를 계속 `<`로 비교하면서 순서를 정하는데, 이때 `__lt__`가 있으면 그 기준을 그대로 따른다.
+
+**매번 `__lt__`를 만들기 번거롭다면**: `sorted(dogs, key=lambda d: d.age)`처럼 정렬 기준을 그때그때 `key`로 넘기는 방법도 있다. 클래스 자체에 "타고난 정렬 순서"가 있을 때만 `__lt__`를 정의하고, 상황마다 기준이 달라진다면 `key`를 쓰는 것이 더 유연하다.
+
+## __len__ — len()이 통하게 만들기
+
+```python
+class Playlist:
+    def __init__(self, songs):
+        self.songs = songs
+
+    def __len__(self):        # len(playlist)를 호출하면 이 메서드가 실행됨
+        return len(self.songs)
+
+my_playlist = Playlist(["노래1", "노래2", "노래3"])
+print(len(my_playlist))   # 3
+```
+
+실생활 비유: 매직 메서드는 만국 공통 리모컨 버튼과 같다. `len()`이라는 버튼을 누르면, 그 대상이 리스트든 문자열이든 직접 만든 `Playlist`든 상관없이 "자기 크기를 알려주는" 정해진 동작이 실행된다. 클래스마다 `__len__`을 정의해두기만 하면, 내장 함수라는 공통 리모컨으로 조종할 수 있게 된다.
+
+## JS와 비교
+
+| Python | JavaScript |
+|---|---|
+| `__repr__` / `__str__` | 대응하는 매직 메서드 없음. `toString()`을 오버라이드해서 흉내 |
+| `__eq__` (`==` 오버로딩) | 오버로딩 불가능. `===`/`==`는 항상 참조 비교, 직접 비교 함수를 만들어야 함 |
+| `__lt__` (`<` 오버로딩) | 오버로딩 불가능. `Array.prototype.sort(compareFn)`처럼 비교 함수를 인자로 넘겨야 함 |
+| `__len__` (`len()` 지원) | 대응 없음. `.length` 속성을 직접 정의해야 함 |
+
+가장 큰 차이는 연산자 오버로딩 자체다. JS는 `==`, `<` 같은 연산자의 동작을 클래스마다 바꿀 수 없어서, 항상 별도의 비교 함수나 메서드를 명시적으로 호출해야 한다. Python은 매직 메서드로 연산자 자체의 동작을 바꿀 수 있다는 점이 크게 다르다.
+
+## 실무에서는 이렇게 쓴다
+
+Pydantic 모델(FastAPI에서 씀)은 `__eq__`가 이미 자동으로 구현되어 있어서, 필드 값이 같은 두 모델 인스턴스는 `==`로 비교하면 `True`가 나온다. 테스트 코드에서 `assert response_model == expected_model`처럼 쓸 수 있는 이유가 여기 있다. `__repr__`도 자동 구현되어 있어서, 테스트 실패 시 로그에 모델 내용이 그대로 찍혀 디버깅이 쉬워진다.
+
+## 요약
+
+- `__repr__`은 디버깅용 표현, `__str__`은 사람이 읽기 좋은 표현이다. `__str__`이 없으면 `print()`도 `__repr__`을 대신 쓴다
+- `__eq__`를 정의하면 `==`가 메모리 주소 비교 대신 원하는 기준(예: 필드 값)으로 비교하게 만들 수 있다
+- 함정: `__eq__`를 정의하면 인스턴스가 기본적으로 해시 불가능해져 `set`/딕셔너리 key로 못 쓴다. 필요하면 `__hash__`도 같이 정의해야 한다
+- `__lt__`를 정의하면 `sorted()`와 `<` 비교가 동작한다. 상황마다 기준이 달라진다면 `__lt__` 대신 `sorted(..., key=...)`가 더 유연하다
+- `__len__`을 정의하면 `len(인스턴스)`가 동작한다
+- 매직 메서드는 연산자·내장 함수라는 "공통 리모컨"으로 직접 만든 클래스를 조종할 수 있게 해주는 장치다
+- JS는 연산자 오버로딩을 지원하지 않아 항상 명시적인 비교 함수/메서드가 필요하지만, Python은 매직 메서드로 연산자 동작 자체를 바꿀 수 있다
+- Pydantic 모델은 `__eq__`, `__repr__`이 자동 구현되어 있어 테스트 코드에서 바로 비교·출력할 수 있다
