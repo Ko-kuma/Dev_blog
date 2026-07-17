@@ -1,0 +1,151 @@
+---
+title: "Python 심화 - 이터레이터와 제너레이터 (iterator, generator, yield)"
+date: "2026-07-17"
+category: "Back-End"
+tags: ["Python", "심화", "이터레이터", "제너레이터", "yield", "지연평가"]
+description: "for문 내부 동작 원리, __iter__/__next__ 직접 구현, yield로 제너레이터 만들기, 지연 평가의 메모리 이점"
+thumbnail: "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+
+## 참고 자료
+
+자료에서 사용하는 CS 용어 정리입니다.
+
+[Python 심화 - 이터레이터와 제너레이터 CS용어 정리](/posts/Python16cs정리)
+
+---
+
+## 지금까지 배운 것과 무엇이 다른가
+
+`for x in [1, 2, 3]:`처럼 반복문은 지금까지 셀 수 없이 써봤다. 그런데 그 안에서 정확히 무슨 일이 벌어지는지는 다룬 적이 없다. 오늘은 `for`문의 내부 동작 원리를 뜯어보고, 그 원리를 직접 만든 클래스에도 적용해서 "왜 `Playlist` 객체를 `for song in playlist:`로 순회하지 못할까?"에 답한다.
+
+## 이터러블과 이터레이터
+
+**이터러블(Iterable)**: `for`문으로 순회할 수 있는 대상. 리스트, 문자열, 딕셔너리 등이 해당한다.
+**이터레이터(Iterator)**: 실제로 "다음 값"을 하나씩 꺼내주는 역할을 하는 객체.
+
+```python
+numbers = [1, 2, 3]         # numbers는 이터러블
+it = iter(numbers)            # iter()를 호출하면 이터레이터를 얻는다
+
+print(next(it))   # 1 — next()를 호출할 때마다 다음 값을 하나씩 꺼냄
+print(next(it))   # 2
+print(next(it))   # 3
+print(next(it))   # StopIteration 에러 — 더 이상 꺼낼 값이 없다는 신호
+```
+
+`for x in numbers:`는 사실 내부적으로 `iter(numbers)`로 이터레이터를 만들고, `StopIteration`이 발생할 때까지 `next()`를 계속 호출하는 것을 짧게 쓴 문법일 뿐이다.
+
+실생활 비유: 이터러블은 "책"이고, 이터레이터는 그 책에 꽂혀 있는 "책갈피"다. 책 한 권(이터러블)을 여러 사람이 각자 다른 책갈피(이터레이터)로 동시에 서로 다른 페이지를 읽을 수 있다. `next()`는 "책갈피를 한 장 넘기고 그 페이지 내용을 보여줘"라는 요청이다.
+
+## 직접 이터레이터 만들기: __iter__와 __next__
+
+```python
+class Countdown:
+    def __init__(self, start):
+        self.current = start
+
+    def __iter__(self):        # for문이 시작될 때 호출됨 — 이터레이터 자기 자신을 반환
+        return self
+
+    def __next__(self):        # next()가 호출될 때마다 실행됨
+        if self.current <= 0:
+            raise StopIteration   # 끝났다는 신호를 직접 발생시켜야 함
+        self.current -= 1
+        return self.current + 1
+
+for num in Countdown(3):
+    print(num)   # 3, 2, 1 순서로 출력
+```
+
+`__iter__`와 `__next__` 두 매직 메서드만 구현하면, 직접 만든 클래스도 `for`문으로 순회할 수 있게 된다. 이 두 메서드가 갖춰진 것을 "이터레이터 프로토콜을 따른다"고 말한다.
+
+> 함정: `__next__` 안에서 `raise StopIteration`을 빼먹으면, `for`문이 언제 멈춰야 할지 몰라 무한 루프에 빠진다.
+
+## 제너레이터 — yield로 훨씬 간단하게
+
+위처럼 `__iter__`, `__next__`, `StopIteration`을 매번 직접 관리하는 건 번거롭다. `yield` 키워드를 쓰면 Python이 이 모든 걸 자동으로 처리해준다.
+
+```python
+def countdown(start):
+    current = start
+    while current > 0:
+        yield current      # 여기서 값을 하나 "내어주고" 잠시 멈춤
+        current -= 1
+
+for num in countdown(3):
+    print(num)   # 3, 2, 1 — 위의 클래스 버전과 완전히 같은 결과
+```
+
+`yield`가 있는 함수를 호출하면, 함수 본문이 바로 실행되지 않고 제너레이터라는 특별한 객체가 만들어진다. `next()`가 호출될 때마다 `yield`까지 실행하고 값을 내어준 뒤, 바로 그 자리에서 멈춰 있다가 다음 `next()` 호출 때 멈췄던 지점부터 이어서 실행한다.
+
+실생활 비유: `return`은 요리를 완성해서 접시째로 통째로 내놓는 것이고, `yield`는 코스 요리에서 한 코스씩 순서대로 내어주면서, 손님이 다 먹을 때까지 주방에서 다음 코스 준비를 잠시 멈추고 대기하는 것과 같다.
+
+## 지연 평가와 메모리 이점
+
+```python
+def all_numbers_list(n):
+    return [i for i in range(n)]     # 리스트: n개를 전부 메모리에 만들어둠
+
+def all_numbers_gen(n):
+    for i in range(n):
+        yield i                        # 제너레이터: 필요할 때 하나씩만 만듦
+
+# 리스트는 100만 개 숫자를 한꺼번에 메모리에 올림
+big_list = all_numbers_list(1_000_000)
+
+# 제너레이터는 실제로 next()가 호출되기 전까지 아무 숫자도 만들지 않음
+big_gen = all_numbers_gen(1_000_000)
+```
+
+리스트는 "필요할지도 모르는 값까지 전부 미리 만들어서" 메모리에 쌓아두지만, 제너레이터는 "지금 당장 필요한 값 하나만" 그때그때 만든다. 이렇게 값이 실제로 요청되는 시점까지 계산을 미루는 방식을 지연 평가(Lazy Evaluation)라고 한다.
+
+**실무에서는 이렇게 쓴다**: 수백만 줄짜리 로그 파일을 한 줄씩 처리할 때, 파일 전체를 리스트로 읽어들이면 메모리가 부족할 수 있다. 제너레이터로 한 줄씩만 처리하면 파일 크기와 무관하게 항상 적은 메모리로 처리할 수 있다.
+
+## 제너레이터 표현식
+
+리스트 컴프리헨션의 대괄호를 소괄호로 바꾸면 제너레이터가 된다.
+
+```python
+squares_list = [x**2 for x in range(5)]    # 리스트 컴프리헨션 — [0, 1, 4, 9, 16]
+squares_gen = (x**2 for x in range(5))     # 제너레이터 표현식 — 값을 아직 계산 안 함
+
+print(squares_list)   # [0, 1, 4, 9, 16]
+print(squares_gen)    # <generator object <genexpr> at 0x7f...> — 아직 아무 값도 안 만들어짐
+print(list(squares_gen))   # [0, 1, 4, 9, 16] — list()로 감싸야 실제로 값을 다 뽑아냄
+```
+
+## 함정: 제너레이터는 한 번만 순회 가능하다
+
+```python
+gen = (x for x in range(3))
+print(list(gen))   # [0, 1, 2]
+print(list(gen))   # [] — 이미 다 써버려서 두 번째는 빈 결과!
+```
+
+리스트는 몇 번을 순회해도 그대로 남아있지만, 제너레이터는 한 번 값을 다 내어주고 나면 "소진(exhausted)"되어 다시 순회할 수 없다. 여러 번 순회해야 한다면 리스트로 변환해서 저장해두거나, 매번 새로 제너레이터를 만들어야 한다.
+
+## JS와 비교
+
+| Python | JavaScript |
+|---|---|
+| `yield` | `yield` (똑같이 존재함) |
+| `def gen(): ... yield x` | `function* gen() { ... yield x }` (함수 앞에 `*` 필요) |
+| `for...in` (이터레이터 프로토콜 기반) | `for...of` (이터레이터 프로토콜 기반) |
+
+이 주제는 JS와 개념이 거의 동일하다. JS도 `Symbol.iterator`라는 이름의 메서드를 구현하면 커스텀 이터러블을 만들 수 있고, `function*`과 `yield`로 제너레이터를 만들 수 있다. 문법의 겉모습(`function*` vs `def`)만 다를 뿐, "값을 하나씩 지연해서 만들어낸다"는 원리는 동일하다.
+
+## 실무에서는 이렇게 쓴다
+
+FastAPI에서 큰 파일이나 실시간 데이터를 클라이언트에 조금씩 흘려보내는 `StreamingResponse`는 제너레이터를 기반으로 동작한다. 응답 전체를 메모리에 만들어두고 한 번에 보내는 대신, 제너레이터가 값을 하나씩 만들어낼 때마다 그만큼만 클라이언트에 전송한다. 나중에 배울 비동기 제너레이터(`async def`+`yield`)도 오늘 배운 원리에 비동기 개념이 더해진 것뿐이다.
+
+## 요약
+
+- `for`문은 내부적으로 `iter()`로 이터레이터를 얻고, `StopIteration`이 날 때까지 `next()`를 반복 호출하는 것이다
+- `__iter__`와 `__next__`를 구현하면 직접 만든 클래스도 `for`문으로 순회할 수 있다(이터레이터 프로토콜)
+- `yield`를 쓰면 `__iter__`/`__next__`/`StopIteration`을 직접 관리하지 않아도 Python이 자동으로 처리해주는 제너레이터를 만들 수 있다
+- 제너레이터는 필요한 값만 그때그때 만드는 지연 평가 방식이라, 리스트 전체를 미리 만드는 것보다 메모리를 훨씬 적게 쓴다
+- `(x for x in ...)`처럼 소괄호를 쓰면 제너레이터 표현식이 된다. 리스트 컴프리헨션과 문법은 비슷하지만 즉시 계산하지 않는다는 차이가 있다
+- 함정: 제너레이터는 한 번 순회하면 소진되어 다시 쓸 수 없다. 여러 번 순회할 값이라면 리스트로 저장해야 한다
+- JS도 `function*`/`yield`로 거의 동일한 개념을 지원한다
+- FastAPI의 `StreamingResponse`는 제너레이터 원리를 그대로 활용해 큰 응답을 조금씩 흘려보낸다
