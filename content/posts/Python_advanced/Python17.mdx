@@ -1,0 +1,144 @@
+---
+title: "Python 심화 - 커스텀 컨텍스트 매니저 만들기 (__enter__, __exit__, @contextmanager)"
+date: "2026-07-18"
+category: "Back-End"
+tags: ["Python", "심화", "컨텍스트매니저", "with문", "contextlib"]
+description: "with문이 내부적으로 호출하는 __enter__/__exit__ 직접 구현하기, contextlib.contextmanager로 제너레이터 기반 컨텍스트 매니저 만들기"
+thumbnail: "https://res.cloudinary.com/dkoelj2r2/image/upload/v1782226365/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2026-06-23_235225_sqfoat.png"
+---
+
+## 참고 자료
+
+자료에서 사용하는 CS 용어 정리입니다.
+
+[Python 심화 - 커스텀 컨텍스트 매니저 CS용어 정리](/posts/Python17cs정리)
+
+---
+
+## 지금까지 배운 것과 무엇이 다른가
+
+`with open("note.txt") as f:`를 배울 때, `with`문이 끝나면 자동으로 `close()`가 호출된다고만 배웠다. 그런데 왜 파일 객체는 `with`문에 쓸 수 있고, 직접 만든 클래스는 안 될까? 오늘은 `with`문이 내부적으로 정확히 무엇을 호출하는지 뜯어보고, 똑같은 자동 정리 기능을 직접 만든 클래스에도 달아본다.
+
+## __enter__와 __exit__ — with문의 정체
+
+`with`문은 내부적으로 두 개의 정해진 매직 메서드를 호출한다.
+
+```python
+class FileManager:
+    def __init__(self, filename, mode):
+        self.filename = filename
+        self.mode = mode
+
+    def __enter__(self):                       # with 블록에 들어갈 때 자동 호출
+        print("파일 여는 중...")
+        self.file = open(self.filename, self.mode)
+        return self.file                          # as 뒤의 변수에 이 반환값이 들어감
+
+    def __exit__(self, exc_type, exc_value, traceback):   # with 블록을 빠져나갈 때 자동 호출
+        print("파일 닫는 중...")
+        self.file.close()
+
+with FileManager("note.txt", "w") as f:
+    f.write("안녕하세요")
+```
+
+```text
+파일 여는 중...
+파일 닫는 중...
+```
+
+`with FileManager(...) as f:`를 실행하면 Python은 순서대로 이렇게 동작한다: ①객체를 만들고 ②`__enter__()`를 호출해서 그 반환값을 `f`에 대입 ③블록 안의 코드를 실행 ④블록이 끝나면(정상 종료든 예외든) `__exit__()`를 반드시 호출.
+
+실생활 비유: 호텔 체크인/체크아웃 절차와 같다. `__enter__`는 체크인(방을 배정받고 열쇠를 받는 것)이고, `__exit__`는 체크아웃(방을 반납하고 정산하는 것)이다. 투숙객이 방 안에서 무슨 일을 겪든(정전이 나든, 예외적인 상황이 생기든) 퇴실 절차는 반드시 진행된다.
+
+## __exit__의 세 매개변수와 예외 처리
+
+`with` 블록 안에서 예외가 발생하면, 그 정보가 `__exit__`의 세 매개변수로 전달된다.
+
+```python
+class SafeDivider:
+    def __enter__(self):
+        return self
+
+    def divide(self, a, b):
+        return a / b
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type is ZeroDivisionError:
+            print(f"0으로 나누기 에러를 잡았습니다: {exc_value}")
+            return True    # True를 반환하면 예외를 여기서 처리 완료로 취급하고 밖으로 전파하지 않음
+        return False        # False(또는 아무것도 반환 안 함)면 예외가 그대로 밖으로 전파됨
+
+with SafeDivider() as d:
+    print(d.divide(10, 0))
+
+print("프로그램이 여기까지 정상적으로 도달함")
+```
+
+`exc_type`(예외 종류), `exc_value`(예외 메시지), `traceback`(예외 발생 위치 정보)은 블록 안에서 예외가 없었다면 전부 `None`으로 전달된다.
+
+> 함정: `__exit__`에서 `True`를 반환하면 예외가 조용히 사라진다(억제된다). 정말로 그 예외를 무시해도 괜찮은 상황이 아니라면, 로그를 남기지도 않고 `True`만 반환하는 건 버그를 숨기는 위험한 습관이 된다.
+
+## contextlib.contextmanager — 제너레이터로 훨씬 간단하게
+
+어제 배운 `yield`를 활용하면, 클래스를 통째로 만들지 않고도 컨텍스트 매니저를 만들 수 있다.
+
+```python
+from contextlib import contextmanager
+
+@contextmanager
+def file_manager(filename, mode):
+    print("파일 여는 중...")
+    f = open(filename, mode)
+    try:
+        yield f              # 여기까지가 __enter__ 역할. yield된 값이 as 뒤 변수에 들어감
+    finally:
+        print("파일 닫는 중...")
+        f.close()             # yield 이후 코드가 __exit__ 역할 (finally라 예외가 나도 실행됨)
+
+with file_manager("note.txt", "w") as f:
+    f.write("안녕하세요")
+```
+
+`yield` 이전 코드는 `__enter__`, `yield`된 값은 `as` 뒤에 오는 변수, `yield` 이후 코드(보통 `finally` 블록 안)는 `__exit__` 역할을 한다. 클래스 하나 전체를 만드는 것보다 훨씬 짧다.
+
+실생활 비유: 클래스로 만드는 방식이 호텔 체크인/체크아웃 담당 직원을 정식으로 채용하는 것이라면, `@contextmanager`는 "손님이 들어올 때 이렇게 하고, 나갈 때 이렇게 해줘"라고 메모 한 장으로 아르바이트생에게 지시하는 것과 같다. 결과는 같지만 준비 과정이 훨씬 가볍다.
+
+> 함정: `@contextmanager`로 만들 때 `try/finally`를 빼먹으면, `with` 블록 안에서 예외가 발생했을 때 정리 코드(`f.close()`)가 실행되지 않을 수 있다. `yield` 뒤의 정리 코드는 항상 `try/finally`로 감싸는 것이 관례다.
+
+## 실무에서는 이렇게 쓴다
+
+FastAPI에서 데이터베이스 세션을 관리하는 `get_db()` 함수가 바로 이 패턴이다.
+
+```python
+from contextlib import contextmanager
+
+@contextmanager
+def get_db():
+    db = SessionLocal()     # DB 연결(세션) 생성 — __enter__ 역할
+    try:
+        yield db              # 이 db를 실제 요청 처리 로직에서 사용
+    finally:
+        db.close()             # 요청이 끝나면 반드시 연결을 닫음 — __exit__ 역할
+```
+
+이 외에도 실행 시간을 재는 타이머, 임시로 설정값을 바꿨다가 원래대로 되돌리는 작업, 락(lock)을 걸었다가 반드시 해제하는 작업처럼 "시작과 끝이 반드시 짝을 이뤄야 하는" 모든 상황에 컨텍스트 매니저를 쓴다.
+
+## JS와 비교
+
+| Python | JavaScript |
+|---|---|
+| `with 객체 as x:` (언어 자체의 정식 문법) | 정확히 대응하는 문법 없음. `try { ... } finally { ... }`를 직접 써야 함 |
+| `__enter__` / `__exit__` | 대응 없음 |
+
+JS에는 Python의 `with`문 같은 전용 문법이 없어서, "시작과 끝을 반드시 짝지어야 하는" 로직은 매번 `try/finally`를 직접 작성해야 한다. Python은 `with`문과 컨텍스트 매니저 프로토콜로 이 반복되는 패턴을 언어 차원에서 표준화해뒀다는 점이 다르다.
+
+## 요약
+
+- `with 객체 as x:`는 내부적으로 `__enter__()`를 호출해 그 반환값을 `x`에 대입하고, 블록이 끝나면(정상이든 예외든) 반드시 `__exit__()`를 호출한다
+- `__exit__(self, exc_type, exc_value, traceback)`은 블록 안에서 발생한 예외 정보를 전달받으며, `True`를 반환하면 그 예외를 억제(무시)한다
+- 함정: 이유 없이 `__exit__`에서 `True`를 반환하면 실제 버그가 조용히 사라져 디버깅이 어려워진다
+- `@contextmanager` 데코레이터와 `yield`를 쓰면 클래스 없이도 함수 하나로 컨텍스트 매니저를 만들 수 있다. `yield` 앞은 `__enter__`, 뒤는(보통 `finally` 안에) `__exit__` 역할을 한다
+- 함정: `@contextmanager` 방식에서 `try/finally`를 빼먹으면 예외 발생 시 정리 코드가 실행되지 않을 수 있다
+- FastAPI의 DB 세션 관리(`get_db()`)가 바로 이 컨텍스트 매니저 패턴을 그대로 사용한다
+- JS에는 전용 문법이 없어 매번 `try/finally`를 직접 써야 하지만, Python은 `with`문으로 이 패턴을 표준화했다
