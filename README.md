@@ -61,7 +61,7 @@ thumbnail: "https://res.cloudinary.com/..."
 본문을 MDX로 작성합니다.
 ```
 
-`category`는 부모 카테고리, `subcategory`는 서브 카테고리로 사용합니다. 예를 들어 공부 글은 `category: "공부 기록"`과 `subcategory: "Front-End"`처럼 작성하면 `/categories/공부-기록/front-end`에 자동 반영됩니다. 기존 방식처럼 `category: "Front-End"`만 작성한 글도 계속 지원됩니다. `tags`는 여러 개를 넣을 수 있고 `/tags`, `/tags/[slug]` 페이지에 자동 반영됩니다.
+`category`는 부모 카테고리, `subcategory`는 서브 카테고리로 사용합니다. 예를 들어 공부 글은 `category: "공부 기록"`과 `subcategory: "Front-End"`처럼 작성하면 `/categories/공부-기록/front-end`에 자동 반영됩니다. `subcategory`를 생략하면 해당 `category`가 독립 카테고리로 생성됩니다. `tags`는 여러 개를 넣을 수 있고 `/tags`, `/tags/[slug]` 페이지에 자동 반영됩니다.
 
 ## 이미지
 

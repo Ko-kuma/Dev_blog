@@ -58,10 +58,7 @@ export type CategoryGroupSummary = {
   href: string;
 };
 
-const STUDY_CATEGORY_GROUP = "공부 기록";
-const STANDALONE_CATEGORY_GROUPS = new Set(["일상 및 여행"]);
-const LEGACY_STUDY_CATEGORIES = new Set(["Front-End", "Back-End", "CS", "기타", "Jump_To_Python"]);
-const CATEGORY_GROUP_ORDER = [STUDY_CATEGORY_GROUP, "일상 및 여행"];
+const CATEGORY_GROUP_ORDER = ["공부 기록", "일상 및 여행"];
 const SUBCATEGORY_ORDER = ["Front-End", "Back-End", "CS", "Jump_To_Python", "기타"];
 
 function toStringArray(value: unknown) {
@@ -103,15 +100,6 @@ function resolveCategoryPath(frontmatter: Pick<PostFrontmatter, "category" | "su
       categoryGroupSlug: slugify(category),
       subcategory: explicitSubcategory,
       subcategorySlug: slugify(explicitSubcategory),
-    };
-  }
-
-  if (!STANDALONE_CATEGORY_GROUPS.has(category) && LEGACY_STUDY_CATEGORIES.has(category)) {
-    return {
-      categoryGroup: STUDY_CATEGORY_GROUP,
-      categoryGroupSlug: slugify(STUDY_CATEGORY_GROUP),
-      subcategory: category,
-      subcategorySlug: slugify(category),
     };
   }
 
@@ -347,12 +335,7 @@ export function getTagBySlug(tagSlug: string) {
 }
 
 export function getPostsByCategorySlug(categorySlug: string) {
-  return getAllPosts().filter(
-    (post) =>
-      post.categoryGroupSlug === categorySlug ||
-      post.subcategorySlug === categorySlug ||
-      slugify(post.category) === categorySlug,
-  );
+  return getAllPosts().filter((post) => post.categoryGroupSlug === categorySlug);
 }
 
 export function getCategoryBySlug(categorySlug: string) {

@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock3, FolderOpen, Layers3, Tags } from "lucide-react";
 import {
-  getAllCategories,
   getAllCategoryGroups,
   getCategoryGroupBySlug,
   getPostsByCategorySlug,
@@ -19,36 +18,25 @@ type CategoryPageProps = {
 };
 
 export function generateStaticParams() {
-  const params = new Map<string, { slug: string }>();
-
-  for (const group of getAllCategoryGroups()) {
-    params.set(group.slug, { slug: group.slug });
-  }
-
-  for (const category of getAllCategories()) {
-    params.set(category.slug, { slug: category.slug });
-  }
-
-  return Array.from(params.values());
+  return getAllCategoryGroups().map((group) => ({
+    slug: group.slug,
+  }));
 }
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
   const group = getCategoryGroupBySlug(decodedSlug);
-  const category = getAllCategories().find((item) => item.slug === decodedSlug);
 
-  if (!group && !category) {
+  if (!group) {
     return {
       title: "카테고리를 찾을 수 없습니다",
     };
   }
 
-  const title = group?.name || category?.name || "카테고리";
-
   return {
-    title: `${title} 목차`,
-    description: `${title} 카테고리의 게시글 목차입니다.`,
+    title: `${group.name} 목차`,
+    description: `${group.name} 카테고리의 게시글 목차입니다.`,
   };
 }
 
@@ -177,17 +165,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
   const group = getCategoryGroupBySlug(decodedSlug);
-  const legacyCategory = getAllCategories().find((category) => category.slug === decodedSlug);
 
-  if (!group && !legacyCategory) {
+  if (!group) {
     notFound();
   }
 
-  const title = group?.name || legacyCategory?.name || "";
-  const count = group?.count || legacyCategory?.count || 0;
-  const posts = group ? getPostsByCategorySlug(group.slug) : legacyCategory?.posts || [];
-  const currentGroupSlug = group?.slug || legacyCategory?.parent?.slug || legacyCategory?.slug;
-  const currentSubcategorySlug = group ? undefined : legacyCategory?.slug;
+  const posts = getPostsByCategorySlug(group.slug);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
@@ -203,9 +186,9 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           <p className="font-mono text-sm font-bold uppercase text-coral dark:text-mint">
             Category
           </p>
-          <h1 className="text-4xl font-black text-ink dark:text-paper">{title}</h1>
+          <h1 className="text-4xl font-black text-ink dark:text-paper">{group.name}</h1>
           <p className="text-ink/68 dark:text-paper/68">
-            {count}개의 글을 목차 형식으로 모았습니다.
+            {group.count}개의 글을 목차 형식으로 모았습니다.
           </p>
         </div>
       </header>
@@ -213,13 +196,12 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <div className="grid gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
         <aside className="lg:sticky lg:top-24 lg:h-fit">
           <CategorySidebar
-            currentGroupSlug={currentGroupSlug}
-            currentSubcategorySlug={currentSubcategorySlug}
+            currentGroupSlug={group.slug}
           />
         </aside>
 
         <div className="space-y-10">
-          {group?.subcategories.length ? (
+          {group.subcategories.length ? (
             group.subcategories.map((subcategory) => (
               <SubcategorySection key={subcategory.slug} subcategory={subcategory} />
             ))
@@ -227,7 +209,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             <section className="space-y-3">
               <div className="flex items-center gap-2 text-xl font-black text-ink dark:text-paper">
                 <FolderOpen aria-hidden size={20} />
-                {title}
+                {group.name}
               </div>
               <PostIndexList posts={posts} />
             </section>
