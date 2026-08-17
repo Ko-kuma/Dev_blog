@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getAllCategories, getAllPosts, getAllTags } from "@/lib/posts";
+import { getAllCategoryGroups, getAllPosts, getAllTags } from "@/lib/posts";
 import { siteConfig } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -18,10 +18,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(),
   }));
 
-  const categoryRoutes = getAllCategories().map((category) => ({
-    url: `${siteConfig.url}/categories/${category.slug}`,
+  const categoryGroups = getAllCategoryGroups();
+
+  const categoryRoutes = categoryGroups.map((category) => ({
+    url: `${siteConfig.url}${category.href}`,
     lastModified: new Date(),
   }));
 
-  return [...baseRoutes, ...postRoutes, ...categoryRoutes, ...tagRoutes];
+  const subcategoryRoutes = categoryGroups.flatMap((category) =>
+    category.subcategories.map((subcategory) => ({
+      url: `${siteConfig.url}${subcategory.href}`,
+      lastModified: new Date(),
+    })),
+  );
+
+  return [...baseRoutes, ...postRoutes, ...categoryRoutes, ...subcategoryRoutes, ...tagRoutes];
 }

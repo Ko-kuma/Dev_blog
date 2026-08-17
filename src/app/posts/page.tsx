@@ -17,7 +17,11 @@ export default async function PostsPage({
   const categories = getAllCategories();
   const { category: selected } = await searchParams;
 
-  const posts = selected ? allPosts.filter((post) => post.category === selected) : allPosts;
+  const posts = selected
+    ? allPosts.filter(
+        (post) => post.category === selected || post.categoryGroup === selected || post.subcategory === selected,
+      )
+    : allPosts;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:py-14">

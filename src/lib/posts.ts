@@ -10,12 +10,20 @@ export type PostFrontmatter = {
   title: string;
   date: string;
   category: string;
+  subcategory?: string;
   tags: string[];
   description: string;
   thumbnail: string;
 };
 
-export type Post = PostFrontmatter & {
+export type CategoryPath = {
+  categoryGroup: string;
+  categoryGroupSlug: string;
+  subcategory?: string;
+  subcategorySlug?: string;
+};
+
+export type Post = PostFrontmatter & CategoryPath & {
   slug: string;
   content: string;
   readingTime: number;
@@ -34,7 +42,27 @@ export type CategorySummary = {
   slug: string;
   count: number;
   posts: PostListItem[];
+  parent?: {
+    name: string;
+    slug: string;
+  };
+  href: string;
 };
+
+export type CategoryGroupSummary = {
+  name: string;
+  slug: string;
+  count: number;
+  posts: PostListItem[];
+  subcategories: CategorySummary[];
+  href: string;
+};
+
+const STUDY_CATEGORY_GROUP = "공부 기록";
+const STANDALONE_CATEGORY_GROUPS = new Set(["일상 및 여행"]);
+const LEGACY_STUDY_CATEGORIES = new Set(["Front-End", "Back-End", "CS", "기타", "Jump_To_Python"]);
+const CATEGORY_GROUP_ORDER = [STUDY_CATEGORY_GROUP, "일상 및 여행"];
+const SUBCATEGORY_ORDER = ["Front-End", "Back-End", "CS", "Jump_To_Python", "기타"];
 
 function toStringArray(value: unknown) {
   if (Array.isArray(value)) {
@@ -52,14 +80,62 @@ function toStringArray(value: unknown) {
 }
 
 function getFrontmatter(data: Record<string, unknown>, slug: string): PostFrontmatter {
+  const subcategory = String(data.subcategory || "").trim();
+
   return {
     title: String(data.title || slug),
     date: String(data.date || new Date().toISOString().slice(0, 10)),
     category: String(data.category || "기타"),
+    ...(subcategory ? { subcategory } : {}),
     tags: toStringArray(data.tags),
     description: String(data.description || ""),
     thumbnail: String(data.thumbnail || ""),
   };
+}
+
+function resolveCategoryPath(frontmatter: Pick<PostFrontmatter, "category" | "subcategory">): CategoryPath {
+  const category = frontmatter.category.trim() || "기타";
+  const explicitSubcategory = frontmatter.subcategory?.trim();
+
+  if (explicitSubcategory) {
+    return {
+      categoryGroup: category,
+      categoryGroupSlug: slugify(category),
+      subcategory: explicitSubcategory,
+      subcategorySlug: slugify(explicitSubcategory),
+    };
+  }
+
+  if (!STANDALONE_CATEGORY_GROUPS.has(category) && LEGACY_STUDY_CATEGORIES.has(category)) {
+    return {
+      categoryGroup: STUDY_CATEGORY_GROUP,
+      categoryGroupSlug: slugify(STUDY_CATEGORY_GROUP),
+      subcategory: category,
+      subcategorySlug: slugify(category),
+    };
+  }
+
+  return {
+    categoryGroup: category,
+    categoryGroupSlug: slugify(category),
+  };
+}
+
+export function getPostCategoryLabel(post: Pick<PostFrontmatter, "category" | "subcategory">) {
+  return post.subcategory || post.category;
+}
+
+function sortByPreferredOrder<T extends { name: string }>(items: T[], preferredOrder: string[]) {
+  return [...items].sort((a, b) => {
+    const aIndex = preferredOrder.indexOf(a.name);
+    const bIndex = preferredOrder.indexOf(b.name);
+
+    if (aIndex !== -1 || bIndex !== -1) {
+      return (aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex) - (bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex);
+    }
+
+    return a.name.localeCompare(b.name);
+  });
 }
 
 function parsePostFile(raw: string) {
@@ -133,11 +209,13 @@ export function getPostBySlug(slug: string): Post | null {
   const raw = fs.readFileSync(fullPath, "utf8");
   const { data, content } = parsePostFile(raw);
   const frontmatter = getFrontmatter(data, realSlug);
+  const categoryPath = resolveCategoryPath(frontmatter);
 
   return {
     slug: realSlug,
     content,
     readingTime: getReadingTime(content),
+    ...categoryPath,
     ...frontmatter,
   };
 }
@@ -152,6 +230,10 @@ export function getAllPosts(): PostListItem[] {
       title: post.title,
       date: post.date,
       category: post.category,
+      subcategory: post.subcategory,
+      categoryGroup: post.categoryGroup,
+      categoryGroupSlug: post.categoryGroupSlug,
+      subcategorySlug: post.subcategorySlug,
       tags: post.tags,
       description: post.description,
       thumbnail: post.thumbnail,
@@ -185,37 +267,74 @@ export function getAllTags(): TagSummary[] {
   return Array.from(tagMap.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export function getAllCategories(): CategorySummary[] {
-  const categoryMap = new Map<string, CategorySummary>();
+export function getAllCategoryGroups(): CategoryGroupSummary[] {
+  type MutableCategoryGroup = Omit<CategoryGroupSummary, "subcategories"> & {
+    subcategoryMap: Map<string, CategorySummary>;
+  };
+
+  const groupMap = new Map<string, MutableCategoryGroup>();
 
   for (const post of getAllPosts()) {
-    const name = post.category.trim() || "기타";
-    const slug = slugify(name);
-
-    if (!slug) {
+    if (!post.categoryGroupSlug) {
       continue;
     }
 
-    const current = categoryMap.get(slug);
+    const currentGroup = groupMap.get(post.categoryGroupSlug);
+    const group: MutableCategoryGroup = currentGroup || {
+      name: post.categoryGroup,
+      slug: post.categoryGroupSlug,
+      count: 0,
+      posts: [],
+      href: `/categories/${post.categoryGroupSlug}`,
+      subcategoryMap: new Map<string, CategorySummary>(),
+    };
 
-    categoryMap.set(slug, {
-      name: current?.name || name,
-      slug,
-      count: (current?.count || 0) + 1,
-      posts: [...(current?.posts || []), post],
-    });
-  }
+    group.count += 1;
+    group.posts.push(post);
 
-  return Array.from(categoryMap.values()).sort((a, b) => {
-    const categoryOrder = ["Front-End", "Back-End", "CS", "기타", "일상 및 여행"];
-    const aIndex = categoryOrder.indexOf(a.name);
-    const bIndex = categoryOrder.indexOf(b.name);
+    if (post.subcategory && post.subcategorySlug) {
+      const currentSubcategory = group.subcategoryMap.get(post.subcategorySlug);
 
-    if (aIndex !== -1 || bIndex !== -1) {
-      return (aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex) - (bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex);
+      group.subcategoryMap.set(post.subcategorySlug, {
+        name: currentSubcategory?.name || post.subcategory,
+        slug: post.subcategorySlug,
+        count: (currentSubcategory?.count || 0) + 1,
+        posts: [...(currentSubcategory?.posts || []), post],
+        parent: {
+          name: group.name,
+          slug: group.slug,
+        },
+        href: `/categories/${group.slug}/${post.subcategorySlug}`,
+      });
     }
 
-    return a.name.localeCompare(b.name);
+    groupMap.set(group.slug, group);
+  }
+
+  return sortByPreferredOrder(
+    Array.from(groupMap.values()).map(({ subcategoryMap, ...group }) => ({
+      ...group,
+      subcategories: sortByPreferredOrder(Array.from(subcategoryMap.values()), SUBCATEGORY_ORDER),
+    })),
+    CATEGORY_GROUP_ORDER,
+  );
+}
+
+export function getAllCategories(): CategorySummary[] {
+  return getAllCategoryGroups().flatMap((group) => {
+    if (group.subcategories.length > 0) {
+      return group.subcategories;
+    }
+
+    return [
+      {
+        name: group.name,
+        slug: group.slug,
+        count: group.count,
+        posts: group.posts,
+        href: group.href,
+      },
+    ];
   });
 }
 
@@ -228,11 +347,28 @@ export function getTagBySlug(tagSlug: string) {
 }
 
 export function getPostsByCategorySlug(categorySlug: string) {
-  return getAllPosts().filter((post) => slugify(post.category) === categorySlug);
+  return getAllPosts().filter(
+    (post) =>
+      post.categoryGroupSlug === categorySlug ||
+      post.subcategorySlug === categorySlug ||
+      slugify(post.category) === categorySlug,
+  );
 }
 
 export function getCategoryBySlug(categorySlug: string) {
-  return getAllCategories().find((category) => category.slug === categorySlug) || null;
+  return getCategoryGroupBySlug(categorySlug) || getAllCategories().find((category) => category.slug === categorySlug) || null;
+}
+
+export function getCategoryGroupBySlug(categorySlug: string) {
+  return getAllCategoryGroups().find((category) => category.slug === categorySlug) || null;
+}
+
+export function getSubcategoryBySlug(categorySlug: string, subcategorySlug: string) {
+  return getCategoryGroupBySlug(categorySlug)?.subcategories.find((subcategory) => subcategory.slug === subcategorySlug) || null;
+}
+
+export function getPostsBySubcategorySlug(categorySlug: string, subcategorySlug: string) {
+  return getAllPosts().filter((post) => post.categoryGroupSlug === categorySlug && post.subcategorySlug === subcategorySlug);
 }
 
 export function getAdjacentPosts(slug: string) {

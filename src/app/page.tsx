@@ -1,14 +1,12 @@
 import Link from "next/link";
 import { ArrowRight, FolderOpen, Sparkles } from "lucide-react";
 import { PostCard } from "@/components/post-card";
-import { categoryGroups } from "@/lib/site";
-import { getAllCategories, getAllPosts, getAllTags } from "@/lib/posts";
-import { slugify } from "@/lib/utils";
+import { getAllCategoryGroups, getAllPosts, getAllTags } from "@/lib/posts";
 
 export default function HomePage() {
   const posts = getAllPosts();
   const tags = getAllTags().slice(0, 12);
-  const categories = getAllCategories();
+  const categoryGroups = getAllCategoryGroups();
   const latestPosts = posts.slice(0, 3);
 
   return (
@@ -67,25 +65,21 @@ export default function HomePage() {
           </div>
           <div className="space-y-5">
             {categoryGroups.map((group) => (
-              <div key={group.name}>
+              <div key={group.slug}>
                 <p className="mb-2 text-sm font-bold text-ink/58 dark:text-paper/58">{group.name}</p>
                 <div className="flex flex-wrap gap-2">
-                  {group.items.map((item) => {
-                    const count = categories.find((category) => category.name === item)?.count || 0;
-
-                    return (
-                      <Link
-                        key={item}
-                        href={`/categories/${slugify(item)}`}
-                        className="inline-flex items-center gap-2 rounded-md border border-ink/10 bg-paper px-3 py-2 text-sm font-medium text-ink/72 transition hover:-translate-y-0.5 hover:border-mint hover:bg-mint/12 dark:border-white/10 dark:bg-white/[0.04] dark:text-paper/72"
-                      >
-                        {item}
-                        <span className="rounded-sm bg-ink/8 px-1.5 py-0.5 font-mono text-xs text-ink/58 dark:bg-white/10 dark:text-paper/62">
-                          {count}
-                        </span>
-                      </Link>
-                    );
-                  })}
+                  {(group.subcategories.length > 0 ? group.subcategories : [group]).map((item) => (
+                    <Link
+                      key={item.slug}
+                      href={item.href}
+                      className="inline-flex items-center gap-2 rounded-md border border-ink/10 bg-paper px-3 py-2 text-sm font-medium text-ink/72 transition hover:-translate-y-0.5 hover:border-mint hover:bg-mint/12 dark:border-white/10 dark:bg-white/[0.04] dark:text-paper/72"
+                    >
+                      {item.name}
+                      <span className="rounded-sm bg-ink/8 px-1.5 py-0.5 font-mono text-xs text-ink/58 dark:bg-white/10 dark:text-paper/62">
+                        {item.count}
+                      </span>
+                    </Link>
+                  ))}
                 </div>
               </div>
             ))}

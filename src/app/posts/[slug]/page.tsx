@@ -8,7 +8,7 @@ import { GiscusComments } from "@/components/giscus-comments";
 import { mdxComponents } from "@/components/mdx-components";
 import { TableOfContents } from "@/components/table-of-contents";
 import { mdxOptions } from "@/lib/mdx-options";
-import { getAdjacentPosts, getAllPosts, getPostBySlug } from "@/lib/posts";
+import { getAdjacentPosts, getAllPosts, getPostBySlug, getPostCategoryLabel } from "@/lib/posts";
 import { siteConfig } from "@/lib/site";
 import { getTableOfContents } from "@/lib/toc";
 import { formatDate, slugify } from "@/lib/utils";
@@ -89,7 +89,7 @@ export default async function PostPage({ params }: PostPageProps) {
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink/60 dark:text-paper/60">
               <span className="rounded-md border border-coral/30 bg-coral/10 px-2 py-1 text-coral dark:border-mint/30 dark:bg-mint/10 dark:text-mint">
-                {post.category}
+                {getPostCategoryLabel(post)}
               </span>
               <span className="inline-flex items-center gap-1">
                 <CalendarDays aria-hidden size={15} />

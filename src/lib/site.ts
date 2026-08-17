@@ -9,14 +9,3 @@ export const siteConfig = {
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
   locale: "ko_KR",
 };
-
-export const categoryGroups = [
-  {
-    name: "공부 기록",
-    items: ["Front-End", "Back-End", "CS", "기타"],
-  },
-  {
-    name: "일상 및 여행",
-    items: ["일상 및 여행"],
-  },
-] as const;

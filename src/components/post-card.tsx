@@ -10,6 +10,8 @@ type PostCardProps = {
 };
 
 export function PostCard({ post, compact = false }: PostCardProps) {
+  const categoryLabel = post.subcategory || post.category;
+
   return (
     <article className="group overflow-hidden rounded-lg border border-ink/10 bg-white shadow-sm transition hover:-translate-y-1 hover:border-coral/50 hover:shadow-pixel dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-mint/50">
       {!compact ? (
@@ -31,7 +33,7 @@ export function PostCard({ post, compact = false }: PostCardProps) {
       <div className={cn("space-y-4", compact ? "p-4" : "p-5")}>
         <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-ink/62 dark:text-paper/62">
           <span className="rounded-md border border-coral/30 bg-coral/10 px-2 py-1 text-coral dark:border-mint/30 dark:bg-mint/10 dark:text-mint">
-            {post.category}
+            {categoryLabel}
           </span>
           <span className="inline-flex items-center gap-1">
             <CalendarDays aria-hidden size={14} />
