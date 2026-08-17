@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { BookOpenText, Home, Tags } from "lucide-react";
+import { BookOpenText, FolderOpen, Home, Tags } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
   { href: "/", label: "홈", icon: Home },
   { href: "/posts", label: "글", icon: BookOpenText },
+  { href: "/categories", label: "목차", icon: FolderOpen },
   { href: "/tags", label: "태그", icon: Tags },
 ];
 

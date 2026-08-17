@@ -29,6 +29,13 @@ export type TagSummary = {
   count: number;
 };
 
+export type CategorySummary = {
+  name: string;
+  slug: string;
+  count: number;
+  posts: PostListItem[];
+};
+
 function toStringArray(value: unknown) {
   if (Array.isArray(value)) {
     return value.map(String).filter(Boolean);
@@ -178,12 +185,54 @@ export function getAllTags(): TagSummary[] {
   return Array.from(tagMap.values()).sort((a, b) => a.name.localeCompare(b.name));
 }
 
+export function getAllCategories(): CategorySummary[] {
+  const categoryMap = new Map<string, CategorySummary>();
+
+  for (const post of getAllPosts()) {
+    const name = post.category.trim() || "기타";
+    const slug = slugify(name);
+
+    if (!slug) {
+      continue;
+    }
+
+    const current = categoryMap.get(slug);
+
+    categoryMap.set(slug, {
+      name: current?.name || name,
+      slug,
+      count: (current?.count || 0) + 1,
+      posts: [...(current?.posts || []), post],
+    });
+  }
+
+  return Array.from(categoryMap.values()).sort((a, b) => {
+    const categoryOrder = ["Front-End", "Back-End", "CS", "기타", "일상 및 여행"];
+    const aIndex = categoryOrder.indexOf(a.name);
+    const bIndex = categoryOrder.indexOf(b.name);
+
+    if (aIndex !== -1 || bIndex !== -1) {
+      return (aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex) - (bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex);
+    }
+
+    return a.name.localeCompare(b.name);
+  });
+}
+
 export function getPostsByTagSlug(tagSlug: string) {
   return getAllPosts().filter((post) => post.tags.some((tag) => slugify(tag) === tagSlug));
 }
 
 export function getTagBySlug(tagSlug: string) {
   return getAllTags().find((tag) => tag.slug === tagSlug) || null;
+}
+
+export function getPostsByCategorySlug(categorySlug: string) {
+  return getAllPosts().filter((post) => slugify(post.category) === categorySlug);
+}
+
+export function getCategoryBySlug(categorySlug: string) {
+  return getAllCategories().find((category) => category.slug === categorySlug) || null;
 }
 
 export function getAdjacentPosts(slug: string) {

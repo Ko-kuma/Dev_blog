@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
-import { getAllPosts, getAllTags } from "@/lib/posts";
+import { getAllCategories, getAllPosts, getAllTags } from "@/lib/posts";
 import { siteConfig } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseRoutes = ["", "/posts", "/tags"].map((route) => ({
+  const baseRoutes = ["", "/posts", "/categories", "/tags"].map((route) => ({
     url: `${siteConfig.url}${route}`,
     lastModified: new Date(),
   }));
@@ -18,5 +18,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(),
   }));
 
-  return [...baseRoutes, ...postRoutes, ...tagRoutes];
+  const categoryRoutes = getAllCategories().map((category) => ({
+    url: `${siteConfig.url}/categories/${category.slug}`,
+    lastModified: new Date(),
+  }));
+
+  return [...baseRoutes, ...postRoutes, ...categoryRoutes, ...tagRoutes];
 }

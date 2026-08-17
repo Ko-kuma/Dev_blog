@@ -1,12 +1,14 @@
 import Link from "next/link";
-import { ArrowRight, FolderOpen, Sparkles, Tags } from "lucide-react";
+import { ArrowRight, FolderOpen, Sparkles } from "lucide-react";
 import { PostCard } from "@/components/post-card";
 import { categoryGroups } from "@/lib/site";
-import { getAllPosts, getAllTags } from "@/lib/posts";
+import { getAllCategories, getAllPosts, getAllTags } from "@/lib/posts";
+import { slugify } from "@/lib/utils";
 
 export default function HomePage() {
   const posts = getAllPosts();
   const tags = getAllTags().slice(0, 12);
+  const categories = getAllCategories();
   const latestPosts = posts.slice(0, 3);
 
   return (
@@ -34,11 +36,11 @@ export default function HomePage() {
               <ArrowRight aria-hidden size={17} />
             </Link>
             <Link
-              href="/tags"
+              href="/categories"
               className="inline-flex items-center gap-2 rounded-md border border-ink/10 bg-white px-4 py-3 text-sm font-bold text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-coral/60 dark:border-white/10 dark:bg-white/[0.04] dark:text-paper"
             >
-              태그 보기
-              <Tags aria-hidden size={17} />
+              목차 보기
+              <FolderOpen aria-hidden size={17} />
             </Link>
           </div>
         </div>
@@ -50,24 +52,40 @@ export default function HomePage() {
 
       <section className="mt-14 grid gap-6 lg:grid-cols-[0.72fr_1.28fr]">
         <div className="rounded-lg border border-ink/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-          <div className="mb-4 flex items-center gap-2 text-lg font-bold text-ink dark:text-paper">
-            <FolderOpen aria-hidden size={20} />
-            카테고리
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-lg font-bold text-ink dark:text-paper">
+              <FolderOpen aria-hidden size={20} />
+              카테고리 목차
+            </div>
+            <Link
+              href="/categories"
+              className="inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-bold text-ink/62 transition hover:bg-coral/12 hover:text-ink dark:text-paper/62 dark:hover:bg-mint/12 dark:hover:text-paper"
+            >
+              전체
+              <ArrowRight aria-hidden size={15} />
+            </Link>
           </div>
           <div className="space-y-5">
             {categoryGroups.map((group) => (
               <div key={group.name}>
                 <p className="mb-2 text-sm font-bold text-ink/58 dark:text-paper/58">{group.name}</p>
                 <div className="flex flex-wrap gap-2">
-                  {group.items.map((item) => (
-                    <Link
-                      key={item}
-                      href={'/posts?category=${encodeURIComponent(item)}'}
-                      className="rounded-md border border-ink/10 bg-paper px-3 py-2 text-sm font-medium text-ink/72 dark:border-white/10 dark:bg-white/[0.04] dark:text-paper/72"
-                    >
-                      {item}
-                    </Link>
-                  ))}
+                  {group.items.map((item) => {
+                    const count = categories.find((category) => category.name === item)?.count || 0;
+
+                    return (
+                      <Link
+                        key={item}
+                        href={`/categories/${slugify(item)}`}
+                        className="inline-flex items-center gap-2 rounded-md border border-ink/10 bg-paper px-3 py-2 text-sm font-medium text-ink/72 transition hover:-translate-y-0.5 hover:border-mint hover:bg-mint/12 dark:border-white/10 dark:bg-white/[0.04] dark:text-paper/72"
+                      >
+                        {item}
+                        <span className="rounded-sm bg-ink/8 px-1.5 py-0.5 font-mono text-xs text-ink/58 dark:bg-white/10 dark:text-paper/62">
+                          {count}
+                        </span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             ))}
